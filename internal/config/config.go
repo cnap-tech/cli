@@ -55,7 +55,7 @@ func ConfigDir() (string, error) {
 func Load() (*Config, error) {
 	path, err := configPath()
 	if err != nil {
-		return DefaultConfig(), nil
+		return DefaultConfig(), nil //nolint:nilerr // no home dir → use defaults
 	}
 
 	data, err := os.ReadFile(path)

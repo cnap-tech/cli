@@ -34,20 +34,20 @@ func PrintTable(header []string, rows [][]string) {
 	tw := Table(os.Stdout)
 	for i, h := range header {
 		if i > 0 {
-			fmt.Fprint(tw, "\t")
+			_, _ = fmt.Fprint(tw, "\t")
 		}
-		fmt.Fprint(tw, h)
+		_, _ = fmt.Fprint(tw, h)
 	}
-	fmt.Fprintln(tw)
+	_, _ = fmt.Fprintln(tw)
 
 	for _, row := range rows {
 		for i, col := range row {
 			if i > 0 {
-				fmt.Fprint(tw, "\t")
+				_, _ = fmt.Fprint(tw, "\t")
 			}
-			fmt.Fprint(tw, col)
+			_, _ = fmt.Fprint(tw, col)
 		}
-		fmt.Fprintln(tw)
+		_, _ = fmt.Fprintln(tw)
 	}
-	tw.Flush()
+	_ = tw.Flush()
 }

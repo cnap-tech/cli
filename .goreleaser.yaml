@@ -1,0 +1,55 @@
+version: 2
+project_name: cnap
+
+builds:
+  - main: ./cmd/cnap/
+    binary: cnap
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X github.com/cnap-tech/cli/internal/cmd.version={{.Version}}
+      - -X github.com/cnap-tech/cli/internal/cmd.commit={{.ShortCommit}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+brews:
+  - skip_upload: "{{ if .Env.HOMEBREW_TAP_TOKEN }}false{{ else }}true{{ end }}"
+    repository:
+      owner: cnap-tech
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: https://cnap.tech
+    description: CLI for managing CNAP workspaces, clusters, and deployments
+    license: Apache-2.0
+    install: |
+      bin.install "cnap"
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^ci:"
+      - "^chore:"
+
+release:
+  github:
+    owner: cnap-tech
+    name: cli
