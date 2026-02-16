@@ -5,6 +5,10 @@ import (
 
 	authcmd "github.com/cnap-tech/cli/internal/cmd/auth"
 	clusterscmd "github.com/cnap-tech/cli/internal/cmd/clusters"
+	installscmd "github.com/cnap-tech/cli/internal/cmd/installs"
+	productscmd "github.com/cnap-tech/cli/internal/cmd/products"
+	regionscmd "github.com/cnap-tech/cli/internal/cmd/regions"
+	templatescmd "github.com/cnap-tech/cli/internal/cmd/templates"
 	workspacescmd "github.com/cnap-tech/cli/internal/cmd/workspaces"
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/spf13/cobra"
@@ -38,6 +42,10 @@ Authenticate with a Personal Access Token or via browser login.`,
 	root.AddCommand(authcmd.NewCmdAuth())
 	root.AddCommand(workspacescmd.NewCmdWorkspaces())
 	root.AddCommand(clusterscmd.NewCmdClusters())
+	root.AddCommand(templatescmd.NewCmdTemplates())
+	root.AddCommand(productscmd.NewCmdProducts())
+	root.AddCommand(installscmd.NewCmdInstalls())
+	root.AddCommand(regionscmd.NewCmdRegions())
 
 	return root
 }

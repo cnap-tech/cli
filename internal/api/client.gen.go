@@ -30,6 +30,36 @@ const (
 	RUNNING      KaasInfoStatus = "RUNNING"
 )
 
+// Defines values for TemplateRegistryProxyMode.
+const (
+	TemplateRegistryProxyModeAlways      TemplateRegistryProxyMode = "always"
+	TemplateRegistryProxyModeAuto        TemplateRegistryProxyMode = "auto"
+	TemplateRegistryProxyModeLessThannil TemplateRegistryProxyMode = "<nil>"
+	TemplateRegistryProxyModeNever       TemplateRegistryProxyMode = "never"
+)
+
+// Defines values for TemplateDetailRegistryProxyMode.
+const (
+	TemplateDetailRegistryProxyModeAlways      TemplateDetailRegistryProxyMode = "always"
+	TemplateDetailRegistryProxyModeAuto        TemplateDetailRegistryProxyMode = "auto"
+	TemplateDetailRegistryProxyModeLessThannil TemplateDetailRegistryProxyMode = "<nil>"
+	TemplateDetailRegistryProxyModeNever       TemplateDetailRegistryProxyMode = "never"
+)
+
+// Defines values for PostV1TemplatesJSONBodyRegistryProxyMode.
+const (
+	PostV1TemplatesJSONBodyRegistryProxyModeAlways PostV1TemplatesJSONBodyRegistryProxyMode = "always"
+	PostV1TemplatesJSONBodyRegistryProxyModeAuto   PostV1TemplatesJSONBodyRegistryProxyMode = "auto"
+	PostV1TemplatesJSONBodyRegistryProxyModeNever  PostV1TemplatesJSONBodyRegistryProxyMode = "never"
+)
+
+// Defines values for PatchV1TemplatesIdJSONBodyRegistryProxyMode.
+const (
+	PatchV1TemplatesIdJSONBodyRegistryProxyModeAlways PatchV1TemplatesIdJSONBodyRegistryProxyMode = "always"
+	PatchV1TemplatesIdJSONBodyRegistryProxyModeAuto   PatchV1TemplatesIdJSONBodyRegistryProxyMode = "auto"
+	PatchV1TemplatesIdJSONBodyRegistryProxyModeNever  PatchV1TemplatesIdJSONBodyRegistryProxyMode = "never"
+)
+
 // ApiToken defines model for ApiToken.
 type ApiToken struct {
 	// CreatedAt Unix timestamp (ms)
@@ -77,6 +107,39 @@ type Error struct {
 	} `json:"error"`
 }
 
+// HelmSource defines model for HelmSource.
+type HelmSource struct {
+	Chart    HelmSourceChart          `json:"chart"`
+	Id       string                   `json:"id"`
+	Metadata *map[string]*interface{} `json:"metadata,omitempty"`
+	Values   *map[string]*interface{} `json:"values,omitempty"`
+}
+
+// HelmSourceChart defines model for HelmSourceChart.
+type HelmSourceChart struct {
+	Chart          *string `json:"chart,omitempty"`
+	Path           *string `json:"path,omitempty"`
+	RepoUrl        string  `json:"repoUrl"`
+	TargetRevision string  `json:"targetRevision"`
+}
+
+// Install defines model for Install.
+type Install struct {
+	ClusterId string `json:"clusterId"`
+
+	// CreatedAt Unix timestamp (ms)
+	CreatedAt float32 `json:"createdAt"`
+	Id        string  `json:"id"`
+	Name      *string `json:"name"`
+
+	// ProductId Set for product-based installs
+	ProductId *string `json:"productId"`
+
+	// TemplateId Template driving this install
+	TemplateId  *string `json:"templateId"`
+	WorkspaceId string  `json:"workspaceId"`
+}
+
 // KaasInfo Present if cluster is KaaS-managed
 type KaasInfo struct {
 	Status        KaasInfoStatus `json:"status"`
@@ -86,6 +149,66 @@ type KaasInfo struct {
 
 // KaasInfoStatus defines model for KaasInfo.Status.
 type KaasInfoStatus string
+
+// Pod defines model for Pod.
+type Pod struct {
+	Containers []string `json:"containers"`
+	Name       string   `json:"name"`
+}
+
+// Product defines model for Product.
+type Product struct {
+	// CreatedAt Unix timestamp (ms)
+	CreatedAt float32 `json:"createdAt"`
+	Id        string  `json:"id"`
+	Name      string  `json:"name"`
+	Settings  *struct {
+		CustomDescription *string `json:"customDescription,omitempty"`
+		CustomImage       *string `json:"customImage,omitempty"`
+		ShowSources       *bool   `json:"showSources,omitempty"`
+	} `json:"settings"`
+	TemplateId  string `json:"templateId"`
+	WorkspaceId string `json:"workspaceId"`
+}
+
+// Region defines model for Region.
+type Region struct {
+	// CreatedAt Unix timestamp (ms)
+	CreatedAt float32 `json:"createdAt"`
+
+	// Icon Icon URL
+	Icon        *string `json:"icon"`
+	Id          string  `json:"id"`
+	Name        string  `json:"name"`
+	WorkspaceId string  `json:"workspaceId"`
+}
+
+// Template defines model for Template.
+type Template struct {
+	// CreatedAt Unix timestamp (ms)
+	CreatedAt         float32                    `json:"createdAt"`
+	Id                string                     `json:"id"`
+	Name              string                     `json:"name"`
+	RegistryProxyMode *TemplateRegistryProxyMode `json:"registryProxyMode"`
+	WorkspaceId       string                     `json:"workspaceId"`
+}
+
+// TemplateRegistryProxyMode defines model for Template.RegistryProxyMode.
+type TemplateRegistryProxyMode string
+
+// TemplateDetail defines model for TemplateDetail.
+type TemplateDetail struct {
+	// CreatedAt Unix timestamp (ms)
+	CreatedAt         float32                          `json:"createdAt"`
+	HelmSources       []HelmSource                     `json:"helmSources"`
+	Id                string                           `json:"id"`
+	Name              string                           `json:"name"`
+	RegistryProxyMode *TemplateDetailRegistryProxyMode `json:"registryProxyMode"`
+	WorkspaceId       string                           `json:"workspaceId"`
+}
+
+// TemplateDetailRegistryProxyMode defines model for TemplateDetail.RegistryProxyMode.
+type TemplateDetailRegistryProxyMode string
 
 // Workspace defines model for Workspace.
 type Workspace struct {
@@ -104,6 +227,160 @@ type PatchV1ClustersIdJSONBody struct {
 	RegionId *string `json:"regionId,omitempty"`
 }
 
+// GetV1InstallsIdLogsParams defines parameters for GetV1InstallsIdLogs.
+type GetV1InstallsIdLogsParams struct {
+	// Pod Pod name (all pods if omitted)
+	Pod *string `form:"pod,omitempty" json:"pod,omitempty"`
+
+	// Container Container name
+	Container *string `form:"container,omitempty" json:"container,omitempty"`
+
+	// Follow Follow log output
+	Follow *bool `form:"follow,omitempty" json:"follow,omitempty"`
+
+	// Tail Lines to tail
+	Tail *int `form:"tail,omitempty" json:"tail,omitempty"`
+
+	// SinceSeconds Only return logs newer than this many seconds
+	SinceSeconds *int `form:"sinceSeconds,omitempty" json:"sinceSeconds,omitempty"`
+}
+
+// PostV1ProductsJSONBody defines parameters for PostV1Products.
+type PostV1ProductsJSONBody struct {
+	// ClusterIds Cluster IDs to deploy to
+	ClusterIds []string `json:"clusterIds"`
+	Name       string   `json:"name"`
+	Settings   *struct {
+		CustomDescription *string `json:"customDescription,omitempty"`
+		CustomImage       *string `json:"customImage,omitempty"`
+		ShowSources       *bool   `json:"showSources,omitempty"`
+	} `json:"settings,omitempty"`
+	Sources []struct {
+		Chart struct {
+			Chart          *string `json:"chart,omitempty"`
+			Path           *string `json:"path,omitempty"`
+			RepoUrl        string  `json:"repoUrl"`
+			TargetRevision string  `json:"targetRevision"`
+		} `json:"chart"`
+		Metadata *map[string]*interface{} `json:"metadata,omitempty"`
+		Values   *map[string]*interface{} `json:"values,omitempty"`
+	} `json:"sources"`
+	StripePriceIds *[]string `json:"stripePriceIds,omitempty"`
+}
+
+// PatchV1ProductsIdJSONBody defines parameters for PatchV1ProductsId.
+type PatchV1ProductsIdJSONBody struct {
+	ClusterIds []string `json:"clusterIds"`
+	Name       string   `json:"name"`
+	Settings   *struct {
+		CustomDescription *string `json:"customDescription,omitempty"`
+		CustomImage       *string `json:"customImage,omitempty"`
+		ShowSources       *bool   `json:"showSources,omitempty"`
+	} `json:"settings,omitempty"`
+	Sources []struct {
+		Chart struct {
+			Chart          *string `json:"chart,omitempty"`
+			Path           *string `json:"path,omitempty"`
+			RepoUrl        string  `json:"repoUrl"`
+			TargetRevision string  `json:"targetRevision"`
+		} `json:"chart"`
+		Metadata *map[string]*interface{} `json:"metadata,omitempty"`
+		Values   *map[string]*interface{} `json:"values,omitempty"`
+	} `json:"sources"`
+	StripePriceIds *[]string `json:"stripePriceIds,omitempty"`
+}
+
+// PostV1RegionsJSONBody defines parameters for PostV1Regions.
+type PostV1RegionsJSONBody struct {
+	// Icon Icon URL
+	Icon *string `json:"icon,omitempty"`
+	Name string  `json:"name"`
+}
+
+// PostV1TemplatesJSONBody defines parameters for PostV1Templates.
+type PostV1TemplatesJSONBody struct {
+	Name              string                                    `json:"name"`
+	RegistryProxyMode *PostV1TemplatesJSONBodyRegistryProxyMode `json:"registryProxyMode,omitempty"`
+	Sources           []struct {
+		Chart struct {
+			Chart          *string `json:"chart,omitempty"`
+			Path           *string `json:"path,omitempty"`
+			RepoUrl        string  `json:"repoUrl"`
+			TargetRevision string  `json:"targetRevision"`
+		} `json:"chart"`
+		Metadata *struct {
+			ArtifactHubHelmPackage *map[string]*interface{} `json:"artifactHubHelmPackage,omitempty"`
+			AutoDeploy             *bool                    `json:"autoDeploy,omitempty"`
+			Image                  *struct {
+				Github *struct {
+					Repository *struct {
+						FullName string  `json:"fullName"`
+						HtmlUrl  string  `json:"htmlUrl"`
+						Id       float32 `json:"id"`
+						Name     string  `json:"name"`
+						Owner    struct {
+							AvatarUrl string  `json:"avatarUrl"`
+							HtmlUrl   string  `json:"htmlUrl"`
+							Id        float32 `json:"id"`
+							Login     string  `json:"login"`
+							Type      string  `json:"type"`
+						} `json:"owner"`
+					} `json:"repository,omitempty"`
+					WorkflowRunId *string `json:"workflowRunId,omitempty"`
+				} `json:"github,omitempty"`
+				Tag string `json:"tag"`
+				Url string `json:"url"`
+			} `json:"image,omitempty"`
+		} `json:"metadata,omitempty"`
+		Values *map[string]*interface{} `json:"values,omitempty"`
+	} `json:"sources"`
+}
+
+// PostV1TemplatesJSONBodyRegistryProxyMode defines parameters for PostV1Templates.
+type PostV1TemplatesJSONBodyRegistryProxyMode string
+
+// PatchV1TemplatesIdJSONBody defines parameters for PatchV1TemplatesId.
+type PatchV1TemplatesIdJSONBody struct {
+	Name              *string                                      `json:"name,omitempty"`
+	RegistryProxyMode *PatchV1TemplatesIdJSONBodyRegistryProxyMode `json:"registryProxyMode,omitempty"`
+	Sources           *[]struct {
+		Chart struct {
+			Chart          *string `json:"chart,omitempty"`
+			Path           *string `json:"path,omitempty"`
+			RepoUrl        string  `json:"repoUrl"`
+			TargetRevision string  `json:"targetRevision"`
+		} `json:"chart"`
+		Metadata *struct {
+			ArtifactHubHelmPackage *map[string]*interface{} `json:"artifactHubHelmPackage,omitempty"`
+			AutoDeploy             *bool                    `json:"autoDeploy,omitempty"`
+			Image                  *struct {
+				Github *struct {
+					Repository *struct {
+						FullName string  `json:"fullName"`
+						HtmlUrl  string  `json:"htmlUrl"`
+						Id       float32 `json:"id"`
+						Name     string  `json:"name"`
+						Owner    struct {
+							AvatarUrl string  `json:"avatarUrl"`
+							HtmlUrl   string  `json:"htmlUrl"`
+							Id        float32 `json:"id"`
+							Login     string  `json:"login"`
+							Type      string  `json:"type"`
+						} `json:"owner"`
+					} `json:"repository,omitempty"`
+					WorkflowRunId *string `json:"workflowRunId,omitempty"`
+				} `json:"github,omitempty"`
+				Tag string `json:"tag"`
+				Url string `json:"url"`
+			} `json:"image,omitempty"`
+		} `json:"metadata,omitempty"`
+		Values *map[string]*interface{} `json:"values,omitempty"`
+	} `json:"sources,omitempty"`
+}
+
+// PatchV1TemplatesIdJSONBodyRegistryProxyMode defines parameters for PatchV1TemplatesId.
+type PatchV1TemplatesIdJSONBodyRegistryProxyMode string
+
 // PostV1UserTokensJSONBody defines parameters for PostV1UserTokens.
 type PostV1UserTokensJSONBody struct {
 	// ExpiresInDays Token expiry in days. Omit for no expiry.
@@ -115,6 +392,21 @@ type PostV1UserTokensJSONBody struct {
 
 // PatchV1ClustersIdJSONRequestBody defines body for PatchV1ClustersId for application/json ContentType.
 type PatchV1ClustersIdJSONRequestBody PatchV1ClustersIdJSONBody
+
+// PostV1ProductsJSONRequestBody defines body for PostV1Products for application/json ContentType.
+type PostV1ProductsJSONRequestBody PostV1ProductsJSONBody
+
+// PatchV1ProductsIdJSONRequestBody defines body for PatchV1ProductsId for application/json ContentType.
+type PatchV1ProductsIdJSONRequestBody PatchV1ProductsIdJSONBody
+
+// PostV1RegionsJSONRequestBody defines body for PostV1Regions for application/json ContentType.
+type PostV1RegionsJSONRequestBody PostV1RegionsJSONBody
+
+// PostV1TemplatesJSONRequestBody defines body for PostV1Templates for application/json ContentType.
+type PostV1TemplatesJSONRequestBody PostV1TemplatesJSONBody
+
+// PatchV1TemplatesIdJSONRequestBody defines body for PatchV1TemplatesId for application/json ContentType.
+type PatchV1TemplatesIdJSONRequestBody PatchV1TemplatesIdJSONBody
 
 // PostV1UserTokensJSONRequestBody defines body for PostV1UserTokens for application/json ContentType.
 type PostV1UserTokensJSONRequestBody PostV1UserTokensJSONBody
@@ -206,6 +498,67 @@ type ClientInterface interface {
 
 	PatchV1ClustersId(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetV1Installs request
+	GetV1Installs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteV1InstallsId request
+	DeleteV1InstallsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1InstallsId request
+	GetV1InstallsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1InstallsIdLogs request
+	GetV1InstallsIdLogs(ctx context.Context, id string, params *GetV1InstallsIdLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1InstallsIdPods request
+	GetV1InstallsIdPods(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Products request
+	GetV1Products(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostV1ProductsWithBody request with any body
+	PostV1ProductsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1Products(ctx context.Context, body PostV1ProductsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteV1ProductsId request
+	DeleteV1ProductsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1ProductsId request
+	GetV1ProductsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchV1ProductsIdWithBody request with any body
+	PatchV1ProductsIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchV1ProductsId(ctx context.Context, id string, body PatchV1ProductsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Regions request
+	GetV1Regions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostV1RegionsWithBody request with any body
+	PostV1RegionsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1Regions(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Templates request
+	GetV1Templates(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostV1TemplatesWithBody request with any body
+	PostV1TemplatesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1Templates(ctx context.Context, body PostV1TemplatesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteV1TemplatesId request
+	DeleteV1TemplatesId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1TemplatesId request
+	GetV1TemplatesId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchV1TemplatesIdWithBody request with any body
+	PatchV1TemplatesIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchV1TemplatesId(ctx context.Context, id string, body PatchV1TemplatesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV1UserTokens request
 	GetV1UserTokens(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -274,6 +627,270 @@ func (c *Client) PatchV1ClustersIdWithBody(ctx context.Context, id string, conte
 
 func (c *Client) PatchV1ClustersId(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchV1ClustersIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Installs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1InstallsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteV1InstallsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteV1InstallsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1InstallsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1InstallsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1InstallsIdLogs(ctx context.Context, id string, params *GetV1InstallsIdLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1InstallsIdLogsRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1InstallsIdPods(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1InstallsIdPodsRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Products(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1ProductsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1ProductsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1ProductsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1Products(ctx context.Context, body PostV1ProductsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1ProductsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteV1ProductsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteV1ProductsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1ProductsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1ProductsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1ProductsIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1ProductsIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1ProductsId(ctx context.Context, id string, body PatchV1ProductsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1ProductsIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Regions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1RegionsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1RegionsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1RegionsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1Regions(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1RegionsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Templates(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1TemplatesRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1TemplatesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1TemplatesRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1Templates(ctx context.Context, body PostV1TemplatesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1TemplatesRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteV1TemplatesId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteV1TemplatesIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1TemplatesId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1TemplatesIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1TemplatesIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1TemplatesIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1TemplatesId(ctx context.Context, id string, body PatchV1TemplatesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1TemplatesIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -479,6 +1096,686 @@ func NewPatchV1ClustersIdRequestWithBody(server string, id string, contentType s
 	}
 
 	operationPath := fmt.Sprintf("/v1/clusters/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetV1InstallsRequest generates requests for GetV1Installs
+func NewGetV1InstallsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteV1InstallsIdRequest generates requests for DeleteV1InstallsId
+func NewDeleteV1InstallsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1InstallsIdRequest generates requests for GetV1InstallsId
+func NewGetV1InstallsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1InstallsIdLogsRequest generates requests for GetV1InstallsIdLogs
+func NewGetV1InstallsIdLogsRequest(server string, id string, params *GetV1InstallsIdLogsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs/%s/logs", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Pod != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pod", runtime.ParamLocationQuery, *params.Pod); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Container != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "container", runtime.ParamLocationQuery, *params.Container); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Follow != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "follow", runtime.ParamLocationQuery, *params.Follow); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Tail != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tail", runtime.ParamLocationQuery, *params.Tail); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SinceSeconds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sinceSeconds", runtime.ParamLocationQuery, *params.SinceSeconds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1InstallsIdPodsRequest generates requests for GetV1InstallsIdPods
+func NewGetV1InstallsIdPodsRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs/%s/pods", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1ProductsRequest generates requests for GetV1Products
+func NewGetV1ProductsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/products")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostV1ProductsRequest calls the generic PostV1Products builder with application/json body
+func NewPostV1ProductsRequest(server string, body PostV1ProductsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1ProductsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1ProductsRequestWithBody generates requests for PostV1Products with any type of body
+func NewPostV1ProductsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/products")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteV1ProductsIdRequest generates requests for DeleteV1ProductsId
+func NewDeleteV1ProductsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/products/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1ProductsIdRequest generates requests for GetV1ProductsId
+func NewGetV1ProductsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/products/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchV1ProductsIdRequest calls the generic PatchV1ProductsId builder with application/json body
+func NewPatchV1ProductsIdRequest(server string, id string, body PatchV1ProductsIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchV1ProductsIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchV1ProductsIdRequestWithBody generates requests for PatchV1ProductsId with any type of body
+func NewPatchV1ProductsIdRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/products/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetV1RegionsRequest generates requests for GetV1Regions
+func NewGetV1RegionsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/regions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostV1RegionsRequest calls the generic PostV1Regions builder with application/json body
+func NewPostV1RegionsRequest(server string, body PostV1RegionsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1RegionsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1RegionsRequestWithBody generates requests for PostV1Regions with any type of body
+func NewPostV1RegionsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/regions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetV1TemplatesRequest generates requests for GetV1Templates
+func NewGetV1TemplatesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/templates")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostV1TemplatesRequest calls the generic PostV1Templates builder with application/json body
+func NewPostV1TemplatesRequest(server string, body PostV1TemplatesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1TemplatesRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1TemplatesRequestWithBody generates requests for PostV1Templates with any type of body
+func NewPostV1TemplatesRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/templates")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteV1TemplatesIdRequest generates requests for DeleteV1TemplatesId
+func NewDeleteV1TemplatesIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/templates/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1TemplatesIdRequest generates requests for GetV1TemplatesId
+func NewGetV1TemplatesIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/templates/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchV1TemplatesIdRequest calls the generic PatchV1TemplatesId builder with application/json body
+func NewPatchV1TemplatesIdRequest(server string, id string, body PatchV1TemplatesIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchV1TemplatesIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchV1TemplatesIdRequestWithBody generates requests for PatchV1TemplatesId with any type of body
+func NewPatchV1TemplatesIdRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/templates/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -717,6 +2014,67 @@ type ClientWithResponsesInterface interface {
 
 	PatchV1ClustersIdWithResponse(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1ClustersIdResponse, error)
 
+	// GetV1InstallsWithResponse request
+	GetV1InstallsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error)
+
+	// DeleteV1InstallsIdWithResponse request
+	DeleteV1InstallsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1InstallsIdResponse, error)
+
+	// GetV1InstallsIdWithResponse request
+	GetV1InstallsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1InstallsIdResponse, error)
+
+	// GetV1InstallsIdLogsWithResponse request
+	GetV1InstallsIdLogsWithResponse(ctx context.Context, id string, params *GetV1InstallsIdLogsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsIdLogsResponse, error)
+
+	// GetV1InstallsIdPodsWithResponse request
+	GetV1InstallsIdPodsWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1InstallsIdPodsResponse, error)
+
+	// GetV1ProductsWithResponse request
+	GetV1ProductsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProductsResponse, error)
+
+	// PostV1ProductsWithBodyWithResponse request with any body
+	PostV1ProductsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1ProductsResponse, error)
+
+	PostV1ProductsWithResponse(ctx context.Context, body PostV1ProductsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1ProductsResponse, error)
+
+	// DeleteV1ProductsIdWithResponse request
+	DeleteV1ProductsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1ProductsIdResponse, error)
+
+	// GetV1ProductsIdWithResponse request
+	GetV1ProductsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1ProductsIdResponse, error)
+
+	// PatchV1ProductsIdWithBodyWithResponse request with any body
+	PatchV1ProductsIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1ProductsIdResponse, error)
+
+	PatchV1ProductsIdWithResponse(ctx context.Context, id string, body PatchV1ProductsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1ProductsIdResponse, error)
+
+	// GetV1RegionsWithResponse request
+	GetV1RegionsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegionsResponse, error)
+
+	// PostV1RegionsWithBodyWithResponse request with any body
+	PostV1RegionsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error)
+
+	PostV1RegionsWithResponse(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error)
+
+	// GetV1TemplatesWithResponse request
+	GetV1TemplatesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error)
+
+	// PostV1TemplatesWithBodyWithResponse request with any body
+	PostV1TemplatesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1TemplatesResponse, error)
+
+	PostV1TemplatesWithResponse(ctx context.Context, body PostV1TemplatesJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1TemplatesResponse, error)
+
+	// DeleteV1TemplatesIdWithResponse request
+	DeleteV1TemplatesIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1TemplatesIdResponse, error)
+
+	// GetV1TemplatesIdWithResponse request
+	GetV1TemplatesIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1TemplatesIdResponse, error)
+
+	// PatchV1TemplatesIdWithBodyWithResponse request with any body
+	PatchV1TemplatesIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1TemplatesIdResponse, error)
+
+	PatchV1TemplatesIdWithResponse(ctx context.Context, id string, body PatchV1TemplatesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1TemplatesIdResponse, error)
+
 	// GetV1UserTokensWithResponse request
 	GetV1UserTokensWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1UserTokensResponse, error)
 
@@ -835,6 +2193,453 @@ func (r PatchV1ClustersIdResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PatchV1ClustersIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1InstallsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data []Install `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1InstallsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1InstallsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteV1InstallsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteV1InstallsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteV1InstallsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1InstallsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data Install `json:"data"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1InstallsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1InstallsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1InstallsIdLogsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1InstallsIdLogsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1InstallsIdLogsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1InstallsIdPodsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data []Pod `json:"data"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1InstallsIdPodsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1InstallsIdPodsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1ProductsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data []Product `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1ProductsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1ProductsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostV1ProductsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Data struct {
+			ProductId  string `json:"productId"`
+			TemplateId string `json:"templateId"`
+		} `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+	JSON422 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1ProductsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1ProductsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteV1ProductsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+	JSON409      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteV1ProductsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteV1ProductsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1ProductsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data Product `json:"data"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1ProductsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1ProductsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchV1ProductsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data struct {
+			ProductId  string `json:"productId"`
+			TemplateId string `json:"templateId"`
+		} `json:"data"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+	JSON422 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchV1ProductsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchV1ProductsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1RegionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data []Region `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1RegionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1RegionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostV1RegionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Data Region `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+	JSON422 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1RegionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1RegionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1TemplatesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data []Template `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1TemplatesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1TemplatesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostV1TemplatesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Data struct {
+			TemplateId string `json:"templateId"`
+		} `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+	JSON422 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1TemplatesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1TemplatesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteV1TemplatesIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+	JSON409      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteV1TemplatesIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteV1TemplatesIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1TemplatesIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data TemplateDetail `json:"data"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1TemplatesIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1TemplatesIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchV1TemplatesIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data struct {
+			TemplateId string `json:"templateId"`
+		} `json:"data"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+	JSON422 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchV1TemplatesIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchV1TemplatesIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1008,6 +2813,199 @@ func (c *ClientWithResponses) PatchV1ClustersIdWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParsePatchV1ClustersIdResponse(rsp)
+}
+
+// GetV1InstallsWithResponse request returning *GetV1InstallsResponse
+func (c *ClientWithResponses) GetV1InstallsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error) {
+	rsp, err := c.GetV1Installs(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1InstallsResponse(rsp)
+}
+
+// DeleteV1InstallsIdWithResponse request returning *DeleteV1InstallsIdResponse
+func (c *ClientWithResponses) DeleteV1InstallsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1InstallsIdResponse, error) {
+	rsp, err := c.DeleteV1InstallsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteV1InstallsIdResponse(rsp)
+}
+
+// GetV1InstallsIdWithResponse request returning *GetV1InstallsIdResponse
+func (c *ClientWithResponses) GetV1InstallsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1InstallsIdResponse, error) {
+	rsp, err := c.GetV1InstallsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1InstallsIdResponse(rsp)
+}
+
+// GetV1InstallsIdLogsWithResponse request returning *GetV1InstallsIdLogsResponse
+func (c *ClientWithResponses) GetV1InstallsIdLogsWithResponse(ctx context.Context, id string, params *GetV1InstallsIdLogsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsIdLogsResponse, error) {
+	rsp, err := c.GetV1InstallsIdLogs(ctx, id, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1InstallsIdLogsResponse(rsp)
+}
+
+// GetV1InstallsIdPodsWithResponse request returning *GetV1InstallsIdPodsResponse
+func (c *ClientWithResponses) GetV1InstallsIdPodsWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1InstallsIdPodsResponse, error) {
+	rsp, err := c.GetV1InstallsIdPods(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1InstallsIdPodsResponse(rsp)
+}
+
+// GetV1ProductsWithResponse request returning *GetV1ProductsResponse
+func (c *ClientWithResponses) GetV1ProductsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProductsResponse, error) {
+	rsp, err := c.GetV1Products(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1ProductsResponse(rsp)
+}
+
+// PostV1ProductsWithBodyWithResponse request with arbitrary body returning *PostV1ProductsResponse
+func (c *ClientWithResponses) PostV1ProductsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1ProductsResponse, error) {
+	rsp, err := c.PostV1ProductsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1ProductsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1ProductsWithResponse(ctx context.Context, body PostV1ProductsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1ProductsResponse, error) {
+	rsp, err := c.PostV1Products(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1ProductsResponse(rsp)
+}
+
+// DeleteV1ProductsIdWithResponse request returning *DeleteV1ProductsIdResponse
+func (c *ClientWithResponses) DeleteV1ProductsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1ProductsIdResponse, error) {
+	rsp, err := c.DeleteV1ProductsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteV1ProductsIdResponse(rsp)
+}
+
+// GetV1ProductsIdWithResponse request returning *GetV1ProductsIdResponse
+func (c *ClientWithResponses) GetV1ProductsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1ProductsIdResponse, error) {
+	rsp, err := c.GetV1ProductsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1ProductsIdResponse(rsp)
+}
+
+// PatchV1ProductsIdWithBodyWithResponse request with arbitrary body returning *PatchV1ProductsIdResponse
+func (c *ClientWithResponses) PatchV1ProductsIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1ProductsIdResponse, error) {
+	rsp, err := c.PatchV1ProductsIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1ProductsIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchV1ProductsIdWithResponse(ctx context.Context, id string, body PatchV1ProductsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1ProductsIdResponse, error) {
+	rsp, err := c.PatchV1ProductsId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1ProductsIdResponse(rsp)
+}
+
+// GetV1RegionsWithResponse request returning *GetV1RegionsResponse
+func (c *ClientWithResponses) GetV1RegionsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegionsResponse, error) {
+	rsp, err := c.GetV1Regions(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1RegionsResponse(rsp)
+}
+
+// PostV1RegionsWithBodyWithResponse request with arbitrary body returning *PostV1RegionsResponse
+func (c *ClientWithResponses) PostV1RegionsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error) {
+	rsp, err := c.PostV1RegionsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1RegionsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1RegionsWithResponse(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error) {
+	rsp, err := c.PostV1Regions(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1RegionsResponse(rsp)
+}
+
+// GetV1TemplatesWithResponse request returning *GetV1TemplatesResponse
+func (c *ClientWithResponses) GetV1TemplatesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error) {
+	rsp, err := c.GetV1Templates(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1TemplatesResponse(rsp)
+}
+
+// PostV1TemplatesWithBodyWithResponse request with arbitrary body returning *PostV1TemplatesResponse
+func (c *ClientWithResponses) PostV1TemplatesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1TemplatesResponse, error) {
+	rsp, err := c.PostV1TemplatesWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1TemplatesResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1TemplatesWithResponse(ctx context.Context, body PostV1TemplatesJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1TemplatesResponse, error) {
+	rsp, err := c.PostV1Templates(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1TemplatesResponse(rsp)
+}
+
+// DeleteV1TemplatesIdWithResponse request returning *DeleteV1TemplatesIdResponse
+func (c *ClientWithResponses) DeleteV1TemplatesIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1TemplatesIdResponse, error) {
+	rsp, err := c.DeleteV1TemplatesId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteV1TemplatesIdResponse(rsp)
+}
+
+// GetV1TemplatesIdWithResponse request returning *GetV1TemplatesIdResponse
+func (c *ClientWithResponses) GetV1TemplatesIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1TemplatesIdResponse, error) {
+	rsp, err := c.GetV1TemplatesId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1TemplatesIdResponse(rsp)
+}
+
+// PatchV1TemplatesIdWithBodyWithResponse request with arbitrary body returning *PatchV1TemplatesIdResponse
+func (c *ClientWithResponses) PatchV1TemplatesIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1TemplatesIdResponse, error) {
+	rsp, err := c.PatchV1TemplatesIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1TemplatesIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchV1TemplatesIdWithResponse(ctx context.Context, id string, body PatchV1TemplatesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1TemplatesIdResponse, error) {
+	rsp, err := c.PatchV1TemplatesId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1TemplatesIdResponse(rsp)
 }
 
 // GetV1UserTokensWithResponse request returning *GetV1UserTokensResponse
@@ -1237,6 +3235,743 @@ func ParsePatchV1ClustersIdResponse(rsp *http.Response) (*PatchV1ClustersIdRespo
 			return nil, err
 		}
 		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1InstallsResponse parses an HTTP response from a GetV1InstallsWithResponse call
+func ParseGetV1InstallsResponse(rsp *http.Response) (*GetV1InstallsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1InstallsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data []Install `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteV1InstallsIdResponse parses an HTTP response from a DeleteV1InstallsIdWithResponse call
+func ParseDeleteV1InstallsIdResponse(rsp *http.Response) (*DeleteV1InstallsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteV1InstallsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1InstallsIdResponse parses an HTTP response from a GetV1InstallsIdWithResponse call
+func ParseGetV1InstallsIdResponse(rsp *http.Response) (*GetV1InstallsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1InstallsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data Install `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1InstallsIdLogsResponse parses an HTTP response from a GetV1InstallsIdLogsWithResponse call
+func ParseGetV1InstallsIdLogsResponse(rsp *http.Response) (*GetV1InstallsIdLogsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1InstallsIdLogsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1InstallsIdPodsResponse parses an HTTP response from a GetV1InstallsIdPodsWithResponse call
+func ParseGetV1InstallsIdPodsResponse(rsp *http.Response) (*GetV1InstallsIdPodsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1InstallsIdPodsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data []Pod `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1ProductsResponse parses an HTTP response from a GetV1ProductsWithResponse call
+func ParseGetV1ProductsResponse(rsp *http.Response) (*GetV1ProductsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1ProductsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data []Product `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostV1ProductsResponse parses an HTTP response from a PostV1ProductsWithResponse call
+func ParsePostV1ProductsResponse(rsp *http.Response) (*PostV1ProductsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1ProductsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Data struct {
+				ProductId  string `json:"productId"`
+				TemplateId string `json:"templateId"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteV1ProductsIdResponse parses an HTTP response from a DeleteV1ProductsIdWithResponse call
+func ParseDeleteV1ProductsIdResponse(rsp *http.Response) (*DeleteV1ProductsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteV1ProductsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1ProductsIdResponse parses an HTTP response from a GetV1ProductsIdWithResponse call
+func ParseGetV1ProductsIdResponse(rsp *http.Response) (*GetV1ProductsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1ProductsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data Product `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchV1ProductsIdResponse parses an HTTP response from a PatchV1ProductsIdWithResponse call
+func ParsePatchV1ProductsIdResponse(rsp *http.Response) (*PatchV1ProductsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchV1ProductsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data struct {
+				ProductId  string `json:"productId"`
+				TemplateId string `json:"templateId"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1RegionsResponse parses an HTTP response from a GetV1RegionsWithResponse call
+func ParseGetV1RegionsResponse(rsp *http.Response) (*GetV1RegionsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1RegionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data []Region `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostV1RegionsResponse parses an HTTP response from a PostV1RegionsWithResponse call
+func ParsePostV1RegionsResponse(rsp *http.Response) (*PostV1RegionsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1RegionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Data Region `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1TemplatesResponse parses an HTTP response from a GetV1TemplatesWithResponse call
+func ParseGetV1TemplatesResponse(rsp *http.Response) (*GetV1TemplatesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1TemplatesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data []Template `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostV1TemplatesResponse parses an HTTP response from a PostV1TemplatesWithResponse call
+func ParsePostV1TemplatesResponse(rsp *http.Response) (*PostV1TemplatesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1TemplatesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Data struct {
+				TemplateId string `json:"templateId"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteV1TemplatesIdResponse parses an HTTP response from a DeleteV1TemplatesIdWithResponse call
+func ParseDeleteV1TemplatesIdResponse(rsp *http.Response) (*DeleteV1TemplatesIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteV1TemplatesIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1TemplatesIdResponse parses an HTTP response from a GetV1TemplatesIdWithResponse call
+func ParseGetV1TemplatesIdResponse(rsp *http.Response) (*GetV1TemplatesIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1TemplatesIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data TemplateDetail `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchV1TemplatesIdResponse parses an HTTP response from a PatchV1TemplatesIdWithResponse call
+func ParsePatchV1TemplatesIdResponse(rsp *http.Response) (*PatchV1TemplatesIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchV1TemplatesIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data struct {
+				TemplateId string `json:"templateId"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
 		var dest Error

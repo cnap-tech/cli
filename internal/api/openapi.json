@@ -213,6 +213,267 @@
                     "statusMessage"
                 ],
                 "description": "Present if cluster is KaaS-managed"
+            },
+            "Template": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "PostgreSQL HA"
+                    },
+                    "workspaceId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "registryProxyMode": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "auto",
+                            "always",
+                            "never",
+                            null
+                        ],
+                        "example": "auto"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "workspaceId",
+                    "registryProxyMode",
+                    "createdAt"
+                ]
+            },
+            "TemplateDetail": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Template"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "helmSources": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/HelmSource"
+                                }
+                            }
+                        },
+                        "required": [
+                            "helmSources"
+                        ]
+                    }
+                ]
+            },
+            "HelmSource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "chart": {
+                        "$ref": "#/components/schemas/HelmSourceChart"
+                    },
+                    "values": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "nullable": true
+                        }
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "nullable": true
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "chart"
+                ]
+            },
+            "HelmSourceChart": {
+                "type": "object",
+                "properties": {
+                    "repoUrl": {
+                        "type": "string",
+                        "example": "https://charts.bitnami.com/bitnami"
+                    },
+                    "chart": {
+                        "type": "string",
+                        "example": "postgresql"
+                    },
+                    "targetRevision": {
+                        "type": "string",
+                        "example": "15.5.0"
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "charts/my-chart"
+                    }
+                },
+                "required": [
+                    "repoUrl",
+                    "targetRevision"
+                ]
+            },
+            "Product": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "PostgreSQL Managed"
+                    },
+                    "workspaceId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "templateId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "settings": {
+                        "type": "object",
+                        "nullable": true,
+                        "properties": {
+                            "customImage": {
+                                "type": "string"
+                            },
+                            "customDescription": {
+                                "type": "string"
+                            },
+                            "showSources": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "workspaceId",
+                    "templateId",
+                    "settings",
+                    "createdAt"
+                ]
+            },
+            "Install": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "my-postgres"
+                    },
+                    "workspaceId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "productId": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Set for product-based installs"
+                    },
+                    "templateId": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Template driving this install"
+                    },
+                    "clusterId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "workspaceId",
+                    "productId",
+                    "templateId",
+                    "clusterId",
+                    "createdAt"
+                ]
+            },
+            "Pod": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "postgres-0"
+                    },
+                    "containers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "postgresql"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "containers"
+                ]
+            },
+            "Region": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "us-east-1"
+                    },
+                    "icon": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Icon URL"
+                    },
+                    "workspaceId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "icon",
+                    "workspaceId",
+                    "createdAt"
+                ]
             }
         },
         "parameters": {}
@@ -802,6 +1063,1660 @@
                     },
                     "409": {
                         "description": "Cluster has active installations",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/templates": {
+            "get": {
+                "tags": [
+                    "Templates"
+                ],
+                "summary": "List templates in workspace",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of templates",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Template"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Templates"
+                ],
+                "summary": "Create template",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100,
+                                        "example": "PostgreSQL HA"
+                                    },
+                                    "sources": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "chart": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "repoUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "chart": {
+                                                            "type": "string"
+                                                        },
+                                                        "targetRevision": {
+                                                            "type": "string"
+                                                        },
+                                                        "path": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "repoUrl",
+                                                        "targetRevision"
+                                                    ]
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "metadata": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "artifactHubHelmPackage": {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "image": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "url": {
+                                                                    "type": "string"
+                                                                },
+                                                                "tag": {
+                                                                    "type": "string"
+                                                                },
+                                                                "github": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "workflowRunId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "repository": {
+                                                                            "type": "object",
+                                                                            "properties": {
+                                                                                "id": {
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "htmlUrl": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "name": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "fullName": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "owner": {
+                                                                                    "type": "object",
+                                                                                    "properties": {
+                                                                                        "login": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "id": {
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "type": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "avatarUrl": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "htmlUrl": {
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "login",
+                                                                                        "id",
+                                                                                        "type",
+                                                                                        "avatarUrl",
+                                                                                        "htmlUrl"
+                                                                                    ]
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "id",
+                                                                                "htmlUrl",
+                                                                                "name",
+                                                                                "fullName",
+                                                                                "owner"
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "url",
+                                                                "tag"
+                                                            ]
+                                                        },
+                                                        "autoDeploy": {
+                                                            "type": "boolean"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "chart"
+                                            ]
+                                        },
+                                        "minItems": 1
+                                    },
+                                    "registryProxyMode": {
+                                        "type": "string",
+                                        "enum": [
+                                            "auto",
+                                            "always",
+                                            "never"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "sources"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Template created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "templateId": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "templateId"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/templates/{id}": {
+            "get": {
+                "tags": [
+                    "Templates"
+                ],
+                "summary": "Get template details",
+                "description": "Returns template with its helm sources.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Template ID"
+                        },
+                        "required": true,
+                        "description": "Template ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Template details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/TemplateDetail"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Template not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Templates"
+                ],
+                "summary": "Update template",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Template ID"
+                        },
+                        "required": true,
+                        "description": "Template ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100
+                                    },
+                                    "sources": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "chart": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "repoUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "chart": {
+                                                            "type": "string"
+                                                        },
+                                                        "targetRevision": {
+                                                            "type": "string"
+                                                        },
+                                                        "path": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "repoUrl",
+                                                        "targetRevision"
+                                                    ]
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "metadata": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "artifactHubHelmPackage": {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "image": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "url": {
+                                                                    "type": "string"
+                                                                },
+                                                                "tag": {
+                                                                    "type": "string"
+                                                                },
+                                                                "github": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "workflowRunId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "repository": {
+                                                                            "type": "object",
+                                                                            "properties": {
+                                                                                "id": {
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "htmlUrl": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "name": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "fullName": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "owner": {
+                                                                                    "type": "object",
+                                                                                    "properties": {
+                                                                                        "login": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "id": {
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "type": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "avatarUrl": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "htmlUrl": {
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "login",
+                                                                                        "id",
+                                                                                        "type",
+                                                                                        "avatarUrl",
+                                                                                        "htmlUrl"
+                                                                                    ]
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "id",
+                                                                                "htmlUrl",
+                                                                                "name",
+                                                                                "fullName",
+                                                                                "owner"
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "url",
+                                                                "tag"
+                                                            ]
+                                                        },
+                                                        "autoDeploy": {
+                                                            "type": "boolean"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "chart"
+                                            ]
+                                        },
+                                        "minItems": 1
+                                    },
+                                    "registryProxyMode": {
+                                        "type": "string",
+                                        "enum": [
+                                            "auto",
+                                            "always",
+                                            "never"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Template updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "templateId": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "templateId"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Template not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Templates"
+                ],
+                "summary": "Delete template",
+                "description": "Fails if referenced by products or installs.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Template ID"
+                        },
+                        "required": true,
+                        "description": "Template ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Template deleted"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Template not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Template is referenced by products or installs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List products in workspace",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Product"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create product",
+                "description": "Creates a product with helm sources and cluster associations. Triggers async chart generation.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 2,
+                                        "maxLength": 32,
+                                        "example": "PostgreSQL Managed"
+                                    },
+                                    "sources": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "chart": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "repoUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "chart": {
+                                                            "type": "string"
+                                                        },
+                                                        "targetRevision": {
+                                                            "type": "string"
+                                                        },
+                                                        "path": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "repoUrl",
+                                                        "targetRevision"
+                                                    ]
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "metadata": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "chart"
+                                            ]
+                                        },
+                                        "minItems": 1
+                                    },
+                                    "clusterIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "description": "Cluster IDs to deploy to"
+                                    },
+                                    "stripePriceIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "settings": {
+                                        "type": "object",
+                                        "properties": {
+                                            "customImage": {
+                                                "type": "string"
+                                            },
+                                            "customDescription": {
+                                                "type": "string"
+                                            },
+                                            "showSources": {
+                                                "type": "boolean"
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "sources",
+                                    "clusterIds"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "productId": {
+                                                    "type": "string"
+                                                },
+                                                "templateId": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "productId",
+                                                "templateId"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/products/{id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get product details",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Product ID"
+                        },
+                        "required": true,
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Product"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Update product",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Product ID"
+                        },
+                        "required": true,
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 2,
+                                        "maxLength": 32,
+                                        "example": "PostgreSQL Managed"
+                                    },
+                                    "sources": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "chart": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "repoUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "chart": {
+                                                            "type": "string"
+                                                        },
+                                                        "targetRevision": {
+                                                            "type": "string"
+                                                        },
+                                                        "path": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "repoUrl",
+                                                        "targetRevision"
+                                                    ]
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "metadata": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "chart"
+                                            ]
+                                        },
+                                        "minItems": 1
+                                    },
+                                    "clusterIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1
+                                    },
+                                    "stripePriceIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "settings": {
+                                        "type": "object",
+                                        "properties": {
+                                            "customImage": {
+                                                "type": "string"
+                                            },
+                                            "customDescription": {
+                                                "type": "string"
+                                            },
+                                            "showSources": {
+                                                "type": "boolean"
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "sources",
+                                    "clusterIds"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "productId": {
+                                                    "type": "string"
+                                                },
+                                                "templateId": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "productId",
+                                                "templateId"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Delete product",
+                "description": "Fails if the product has active installs.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Product ID"
+                        },
+                        "required": true,
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Product deleted"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Product has active installs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/installs": {
+            "get": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "List installs in workspace",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of installs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Install"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/installs/{id}": {
+            "get": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "Get install details",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Install ID"
+                        },
+                        "required": true,
+                        "description": "Install ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Install details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Install"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Install not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "Delete install",
+                "description": "Triggers async deletion workflow that removes the ArgoCD application and install record.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Install ID"
+                        },
+                        "required": true,
+                        "description": "Install ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Deletion started"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Install not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/installs/{id}/pods": {
+            "get": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "List pods for install",
+                "description": "Returns pods and their containers for the ArgoCD application.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Install ID"
+                        },
+                        "required": true,
+                        "description": "Install ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of pods",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Pod"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Install not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/installs/{id}/logs": {
+            "get": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "Stream install logs",
+                "description": "Streams logs from the install pods via Server-Sent Events. Use the `Accept: text/event-stream` header.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Install ID"
+                        },
+                        "required": true,
+                        "description": "Install ID",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pod name (all pods if omitted)"
+                        },
+                        "required": false,
+                        "description": "Pod name (all pods if omitted)",
+                        "name": "pod",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Container name"
+                        },
+                        "required": false,
+                        "description": "Container name",
+                        "name": "container",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "boolean",
+                            "nullable": true,
+                            "default": true,
+                            "description": "Follow log output"
+                        },
+                        "required": false,
+                        "description": "Follow log output",
+                        "name": "follow",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "nullable": true,
+                            "description": "Lines to tail"
+                        },
+                        "required": false,
+                        "description": "Lines to tail",
+                        "name": "tail",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "nullable": true,
+                            "default": 0,
+                            "description": "Only return logs newer than this many seconds"
+                        },
+                        "required": false,
+                        "description": "Only return logs newer than this many seconds",
+                        "name": "sinceSeconds",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Log stream (text/event-stream)"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Install not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/regions": {
+            "get": {
+                "tags": [
+                    "Regions"
+                ],
+                "summary": "List regions in workspace",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of regions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Region"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Regions"
+                ],
+                "summary": "Create region",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100,
+                                        "example": "us-east-1"
+                                    },
+                                    "icon": {
+                                        "type": "string",
+                                        "maxLength": 256,
+                                        "format": "uri",
+                                        "description": "Icon URL"
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Region created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Region"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {
