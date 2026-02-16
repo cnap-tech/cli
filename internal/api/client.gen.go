@@ -79,7 +79,6 @@ type Error struct {
 
 // KaasInfo Present if cluster is KaaS-managed
 type KaasInfo struct {
-	Namespace     string         `json:"namespace"`
 	Status        KaasInfoStatus `json:"status"`
 	StatusMessage *string        `json:"statusMessage"`
 	Version       string         `json:"version"`

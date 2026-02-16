@@ -185,10 +185,6 @@
                 "type": "object",
                 "nullable": true,
                 "properties": {
-                    "namespace": {
-                        "type": "string",
-                        "example": "clu-j572abc123def456"
-                    },
                     "version": {
                         "type": "string",
                         "example": "v1.30"
@@ -212,7 +208,6 @@
                     }
                 },
                 "required": [
-                    "namespace",
                     "version",
                     "status",
                     "statusMessage"
