@@ -2294,6 +2294,100 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "Create product install",
+                "description": "Deploys a product to a region. Uses the idempotency key to prevent duplicate installs.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "productId": {
+                                        "type": "string",
+                                        "description": "Product ID"
+                                    },
+                                    "regionId": {
+                                        "type": "string",
+                                        "description": "Region ID"
+                                    },
+                                    "overrides": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "templateHelmSourceId": {
+                                                    "type": "string",
+                                                    "description": "Helm source ID to override"
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    },
+                                                    "description": "Helm values"
+                                                }
+                                            },
+                                            "required": [
+                                                "templateHelmSourceId",
+                                                "values"
+                                            ]
+                                        },
+                                        "description": "Initial value overrides per helm source"
+                                    }
+                                },
+                                "required": [
+                                    "productId",
+                                    "regionId"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Install workflow started"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/v1/installs/{id}": {
@@ -2468,6 +2562,327 @@
                     },
                     "404": {
                         "description": "Install not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/installs/standalone": {
+            "post": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "Create standalone install",
+                "description": "Deploys custom helm sources directly to clusters without a product.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "example": "my-redis"
+                                    },
+                                    "clusterIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "description": "Cluster IDs to deploy to"
+                                    },
+                                    "helmSources": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "chart": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "repoUrl": {
+                                                            "type": "string"
+                                                        },
+                                                        "chart": {
+                                                            "type": "string"
+                                                        },
+                                                        "targetRevision": {
+                                                            "type": "string"
+                                                        },
+                                                        "path": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "repoUrl",
+                                                        "targetRevision"
+                                                    ]
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "metadata": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "chart"
+                                            ]
+                                        },
+                                        "minItems": 1
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "clusterIds",
+                                    "helmSources"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Install workflow started"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/installs/{id}/values": {
+            "patch": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "Update install template values",
+                "description": "Updates template helm source values and regenerates the chart. Use this for standalone installs or to change the base values of a product install.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Install ID"
+                        },
+                        "required": true,
+                        "description": "Install ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "updates": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "templateHelmSourceId": {
+                                                    "type": "string",
+                                                    "description": "Helm source ID"
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    },
+                                                    "description": "Helm values"
+                                                }
+                                            },
+                                            "required": [
+                                                "templateHelmSourceId",
+                                                "values"
+                                            ]
+                                        },
+                                        "minItems": 1
+                                    }
+                                },
+                                "required": [
+                                    "updates"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Update workflow started"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Install not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/installs/{id}/overrides": {
+            "patch": {
+                "tags": [
+                    "Installs"
+                ],
+                "summary": "Update install value overrides",
+                "description": "Applies per-install value overrides on top of the product base values. Does not regenerate the chart.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Install ID"
+                        },
+                        "required": true,
+                        "description": "Install ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "updates": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "templateHelmSourceId": {
+                                                    "type": "string",
+                                                    "description": "Helm source ID"
+                                                },
+                                                "values": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "nullable": true
+                                                    },
+                                                    "description": "Override values"
+                                                }
+                                            },
+                                            "required": [
+                                                "templateHelmSourceId",
+                                                "values"
+                                            ]
+                                        },
+                                        "minItems": 1
+                                    }
+                                },
+                                "required": [
+                                    "updates"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Update workflow started"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Install not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {

@@ -227,6 +227,41 @@ type PatchV1ClustersIdJSONBody struct {
 	RegionId *string `json:"regionId,omitempty"`
 }
 
+// PostV1InstallsJSONBody defines parameters for PostV1Installs.
+type PostV1InstallsJSONBody struct {
+	// Overrides Initial value overrides per helm source
+	Overrides *[]struct {
+		// TemplateHelmSourceId Helm source ID to override
+		TemplateHelmSourceId string `json:"templateHelmSourceId"`
+
+		// Values Helm values
+		Values map[string]*interface{} `json:"values"`
+	} `json:"overrides,omitempty"`
+
+	// ProductId Product ID
+	ProductId string `json:"productId"`
+
+	// RegionId Region ID
+	RegionId string `json:"regionId"`
+}
+
+// PostV1InstallsStandaloneJSONBody defines parameters for PostV1InstallsStandalone.
+type PostV1InstallsStandaloneJSONBody struct {
+	// ClusterIds Cluster IDs to deploy to
+	ClusterIds  []string `json:"clusterIds"`
+	HelmSources []struct {
+		Chart struct {
+			Chart          *string `json:"chart,omitempty"`
+			Path           *string `json:"path,omitempty"`
+			RepoUrl        string  `json:"repoUrl"`
+			TargetRevision string  `json:"targetRevision"`
+		} `json:"chart"`
+		Metadata *map[string]*interface{} `json:"metadata,omitempty"`
+		Values   *map[string]*interface{} `json:"values,omitempty"`
+	} `json:"helmSources"`
+	Name string `json:"name"`
+}
+
 // GetV1InstallsIdLogsParams defines parameters for GetV1InstallsIdLogs.
 type GetV1InstallsIdLogsParams struct {
 	// Pod Pod name (all pods if omitted)
@@ -243,6 +278,28 @@ type GetV1InstallsIdLogsParams struct {
 
 	// SinceSeconds Only return logs newer than this many seconds
 	SinceSeconds *int `form:"sinceSeconds,omitempty" json:"sinceSeconds,omitempty"`
+}
+
+// PatchV1InstallsIdOverridesJSONBody defines parameters for PatchV1InstallsIdOverrides.
+type PatchV1InstallsIdOverridesJSONBody struct {
+	Updates []struct {
+		// TemplateHelmSourceId Helm source ID
+		TemplateHelmSourceId string `json:"templateHelmSourceId"`
+
+		// Values Override values
+		Values map[string]*interface{} `json:"values"`
+	} `json:"updates"`
+}
+
+// PatchV1InstallsIdValuesJSONBody defines parameters for PatchV1InstallsIdValues.
+type PatchV1InstallsIdValuesJSONBody struct {
+	Updates []struct {
+		// TemplateHelmSourceId Helm source ID
+		TemplateHelmSourceId string `json:"templateHelmSourceId"`
+
+		// Values Helm values
+		Values map[string]*interface{} `json:"values"`
+	} `json:"updates"`
 }
 
 // PostV1ProductsJSONBody defines parameters for PostV1Products.
@@ -393,6 +450,18 @@ type PostV1UserTokensJSONBody struct {
 // PatchV1ClustersIdJSONRequestBody defines body for PatchV1ClustersId for application/json ContentType.
 type PatchV1ClustersIdJSONRequestBody PatchV1ClustersIdJSONBody
 
+// PostV1InstallsJSONRequestBody defines body for PostV1Installs for application/json ContentType.
+type PostV1InstallsJSONRequestBody PostV1InstallsJSONBody
+
+// PostV1InstallsStandaloneJSONRequestBody defines body for PostV1InstallsStandalone for application/json ContentType.
+type PostV1InstallsStandaloneJSONRequestBody PostV1InstallsStandaloneJSONBody
+
+// PatchV1InstallsIdOverridesJSONRequestBody defines body for PatchV1InstallsIdOverrides for application/json ContentType.
+type PatchV1InstallsIdOverridesJSONRequestBody PatchV1InstallsIdOverridesJSONBody
+
+// PatchV1InstallsIdValuesJSONRequestBody defines body for PatchV1InstallsIdValues for application/json ContentType.
+type PatchV1InstallsIdValuesJSONRequestBody PatchV1InstallsIdValuesJSONBody
+
 // PostV1ProductsJSONRequestBody defines body for PostV1Products for application/json ContentType.
 type PostV1ProductsJSONRequestBody PostV1ProductsJSONBody
 
@@ -501,6 +570,16 @@ type ClientInterface interface {
 	// GetV1Installs request
 	GetV1Installs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PostV1InstallsWithBody request with any body
+	PostV1InstallsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1Installs(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostV1InstallsStandaloneWithBody request with any body
+	PostV1InstallsStandaloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1InstallsStandalone(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeleteV1InstallsId request
 	DeleteV1InstallsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -510,8 +589,18 @@ type ClientInterface interface {
 	// GetV1InstallsIdLogs request
 	GetV1InstallsIdLogs(ctx context.Context, id string, params *GetV1InstallsIdLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PatchV1InstallsIdOverridesWithBody request with any body
+	PatchV1InstallsIdOverridesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchV1InstallsIdOverrides(ctx context.Context, id string, body PatchV1InstallsIdOverridesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV1InstallsIdPods request
 	GetV1InstallsIdPods(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchV1InstallsIdValuesWithBody request with any body
+	PatchV1InstallsIdValuesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchV1InstallsIdValues(ctx context.Context, id string, body PatchV1InstallsIdValuesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Products request
 	GetV1Products(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -649,6 +738,54 @@ func (c *Client) GetV1Installs(ctx context.Context, reqEditors ...RequestEditorF
 	return c.Client.Do(req)
 }
 
+func (c *Client) PostV1InstallsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1Installs(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1InstallsStandaloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsStandaloneRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1InstallsStandalone(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsStandaloneRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) DeleteV1InstallsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteV1InstallsIdRequest(c.Server, id)
 	if err != nil {
@@ -685,8 +822,56 @@ func (c *Client) GetV1InstallsIdLogs(ctx context.Context, id string, params *Get
 	return c.Client.Do(req)
 }
 
+func (c *Client) PatchV1InstallsIdOverridesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1InstallsIdOverridesRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1InstallsIdOverrides(ctx context.Context, id string, body PatchV1InstallsIdOverridesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1InstallsIdOverridesRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetV1InstallsIdPods(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1InstallsIdPodsRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1InstallsIdValuesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1InstallsIdValuesRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1InstallsIdValues(ctx context.Context, id string, body PatchV1InstallsIdValuesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1InstallsIdValuesRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1142,6 +1327,86 @@ func NewGetV1InstallsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewPostV1InstallsRequest calls the generic PostV1Installs builder with application/json body
+func NewPostV1InstallsRequest(server string, body PostV1InstallsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1InstallsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1InstallsRequestWithBody generates requests for PostV1Installs with any type of body
+func NewPostV1InstallsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostV1InstallsStandaloneRequest calls the generic PostV1InstallsStandalone builder with application/json body
+func NewPostV1InstallsStandaloneRequest(server string, body PostV1InstallsStandaloneJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1InstallsStandaloneRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1InstallsStandaloneRequestWithBody generates requests for PostV1InstallsStandalone with any type of body
+func NewPostV1InstallsStandaloneRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs/standalone")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewDeleteV1InstallsIdRequest generates requests for DeleteV1InstallsId
 func NewDeleteV1InstallsIdRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -1330,6 +1595,53 @@ func NewGetV1InstallsIdLogsRequest(server string, id string, params *GetV1Instal
 	return req, nil
 }
 
+// NewPatchV1InstallsIdOverridesRequest calls the generic PatchV1InstallsIdOverrides builder with application/json body
+func NewPatchV1InstallsIdOverridesRequest(server string, id string, body PatchV1InstallsIdOverridesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchV1InstallsIdOverridesRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchV1InstallsIdOverridesRequestWithBody generates requests for PatchV1InstallsIdOverrides with any type of body
+func NewPatchV1InstallsIdOverridesRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs/%s/overrides", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetV1InstallsIdPodsRequest generates requests for GetV1InstallsIdPods
 func NewGetV1InstallsIdPodsRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -1360,6 +1672,53 @@ func NewGetV1InstallsIdPodsRequest(server string, id string) (*http.Request, err
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPatchV1InstallsIdValuesRequest calls the generic PatchV1InstallsIdValues builder with application/json body
+func NewPatchV1InstallsIdValuesRequest(server string, id string, body PatchV1InstallsIdValuesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchV1InstallsIdValuesRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchV1InstallsIdValuesRequestWithBody generates requests for PatchV1InstallsIdValues with any type of body
+func NewPatchV1InstallsIdValuesRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/installs/%s/values", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2017,6 +2376,16 @@ type ClientWithResponsesInterface interface {
 	// GetV1InstallsWithResponse request
 	GetV1InstallsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error)
 
+	// PostV1InstallsWithBodyWithResponse request with any body
+	PostV1InstallsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error)
+
+	PostV1InstallsWithResponse(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error)
+
+	// PostV1InstallsStandaloneWithBodyWithResponse request with any body
+	PostV1InstallsStandaloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error)
+
+	PostV1InstallsStandaloneWithResponse(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error)
+
 	// DeleteV1InstallsIdWithResponse request
 	DeleteV1InstallsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1InstallsIdResponse, error)
 
@@ -2026,8 +2395,18 @@ type ClientWithResponsesInterface interface {
 	// GetV1InstallsIdLogsWithResponse request
 	GetV1InstallsIdLogsWithResponse(ctx context.Context, id string, params *GetV1InstallsIdLogsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsIdLogsResponse, error)
 
+	// PatchV1InstallsIdOverridesWithBodyWithResponse request with any body
+	PatchV1InstallsIdOverridesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdOverridesResponse, error)
+
+	PatchV1InstallsIdOverridesWithResponse(ctx context.Context, id string, body PatchV1InstallsIdOverridesJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdOverridesResponse, error)
+
 	// GetV1InstallsIdPodsWithResponse request
 	GetV1InstallsIdPodsWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1InstallsIdPodsResponse, error)
+
+	// PatchV1InstallsIdValuesWithBodyWithResponse request with any body
+	PatchV1InstallsIdValuesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdValuesResponse, error)
+
+	PatchV1InstallsIdValuesWithResponse(ctx context.Context, id string, body PatchV1InstallsIdValuesJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdValuesResponse, error)
 
 	// GetV1ProductsWithResponse request
 	GetV1ProductsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProductsResponse, error)
@@ -2225,6 +2604,54 @@ func (r GetV1InstallsResponse) StatusCode() int {
 	return 0
 }
 
+type PostV1InstallsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON403      *Error
+	JSON422      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1InstallsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1InstallsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostV1InstallsStandaloneResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON403      *Error
+	JSON422      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1InstallsStandaloneResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1InstallsStandaloneResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type DeleteV1InstallsIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2297,6 +2724,30 @@ func (r GetV1InstallsIdLogsResponse) StatusCode() int {
 	return 0
 }
 
+type PatchV1InstallsIdOverridesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+	JSON422      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchV1InstallsIdOverridesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchV1InstallsIdOverridesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1InstallsIdPodsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2317,6 +2768,30 @@ func (r GetV1InstallsIdPodsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetV1InstallsIdPodsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchV1InstallsIdValuesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+	JSON422      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchV1InstallsIdValuesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchV1InstallsIdValuesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2824,6 +3299,40 @@ func (c *ClientWithResponses) GetV1InstallsWithResponse(ctx context.Context, req
 	return ParseGetV1InstallsResponse(rsp)
 }
 
+// PostV1InstallsWithBodyWithResponse request with arbitrary body returning *PostV1InstallsResponse
+func (c *ClientWithResponses) PostV1InstallsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error) {
+	rsp, err := c.PostV1InstallsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1InstallsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1InstallsWithResponse(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error) {
+	rsp, err := c.PostV1Installs(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1InstallsResponse(rsp)
+}
+
+// PostV1InstallsStandaloneWithBodyWithResponse request with arbitrary body returning *PostV1InstallsStandaloneResponse
+func (c *ClientWithResponses) PostV1InstallsStandaloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error) {
+	rsp, err := c.PostV1InstallsStandaloneWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1InstallsStandaloneResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1InstallsStandaloneWithResponse(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error) {
+	rsp, err := c.PostV1InstallsStandalone(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1InstallsStandaloneResponse(rsp)
+}
+
 // DeleteV1InstallsIdWithResponse request returning *DeleteV1InstallsIdResponse
 func (c *ClientWithResponses) DeleteV1InstallsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1InstallsIdResponse, error) {
 	rsp, err := c.DeleteV1InstallsId(ctx, id, reqEditors...)
@@ -2851,6 +3360,23 @@ func (c *ClientWithResponses) GetV1InstallsIdLogsWithResponse(ctx context.Contex
 	return ParseGetV1InstallsIdLogsResponse(rsp)
 }
 
+// PatchV1InstallsIdOverridesWithBodyWithResponse request with arbitrary body returning *PatchV1InstallsIdOverridesResponse
+func (c *ClientWithResponses) PatchV1InstallsIdOverridesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdOverridesResponse, error) {
+	rsp, err := c.PatchV1InstallsIdOverridesWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1InstallsIdOverridesResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchV1InstallsIdOverridesWithResponse(ctx context.Context, id string, body PatchV1InstallsIdOverridesJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdOverridesResponse, error) {
+	rsp, err := c.PatchV1InstallsIdOverrides(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1InstallsIdOverridesResponse(rsp)
+}
+
 // GetV1InstallsIdPodsWithResponse request returning *GetV1InstallsIdPodsResponse
 func (c *ClientWithResponses) GetV1InstallsIdPodsWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1InstallsIdPodsResponse, error) {
 	rsp, err := c.GetV1InstallsIdPods(ctx, id, reqEditors...)
@@ -2858,6 +3384,23 @@ func (c *ClientWithResponses) GetV1InstallsIdPodsWithResponse(ctx context.Contex
 		return nil, err
 	}
 	return ParseGetV1InstallsIdPodsResponse(rsp)
+}
+
+// PatchV1InstallsIdValuesWithBodyWithResponse request with arbitrary body returning *PatchV1InstallsIdValuesResponse
+func (c *ClientWithResponses) PatchV1InstallsIdValuesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdValuesResponse, error) {
+	rsp, err := c.PatchV1InstallsIdValuesWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1InstallsIdValuesResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchV1InstallsIdValuesWithResponse(ctx context.Context, id string, body PatchV1InstallsIdValuesJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdValuesResponse, error) {
+	rsp, err := c.PatchV1InstallsIdValues(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1InstallsIdValuesResponse(rsp)
 }
 
 // GetV1ProductsWithResponse request returning *GetV1ProductsResponse
@@ -3297,6 +3840,86 @@ func ParseGetV1InstallsResponse(rsp *http.Response) (*GetV1InstallsResponse, err
 	return response, nil
 }
 
+// ParsePostV1InstallsResponse parses an HTTP response from a PostV1InstallsWithResponse call
+func ParsePostV1InstallsResponse(rsp *http.Response) (*PostV1InstallsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1InstallsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostV1InstallsStandaloneResponse parses an HTTP response from a PostV1InstallsStandaloneWithResponse call
+func ParsePostV1InstallsStandaloneResponse(rsp *http.Response) (*PostV1InstallsStandaloneResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1InstallsStandaloneResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseDeleteV1InstallsIdResponse parses an HTTP response from a DeleteV1InstallsIdWithResponse call
 func ParseDeleteV1InstallsIdResponse(rsp *http.Response) (*DeleteV1InstallsIdResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -3405,6 +4028,46 @@ func ParseGetV1InstallsIdLogsResponse(rsp *http.Response) (*GetV1InstallsIdLogsR
 	return response, nil
 }
 
+// ParsePatchV1InstallsIdOverridesResponse parses an HTTP response from a PatchV1InstallsIdOverridesWithResponse call
+func ParsePatchV1InstallsIdOverridesResponse(rsp *http.Response) (*PatchV1InstallsIdOverridesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchV1InstallsIdOverridesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetV1InstallsIdPodsResponse parses an HTTP response from a GetV1InstallsIdPodsWithResponse call
 func ParseGetV1InstallsIdPodsResponse(rsp *http.Response) (*GetV1InstallsIdPodsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -3441,6 +4104,46 @@ func ParseGetV1InstallsIdPodsResponse(rsp *http.Response) (*GetV1InstallsIdPodsR
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchV1InstallsIdValuesResponse parses an HTTP response from a PatchV1InstallsIdValuesWithResponse call
+func ParsePatchV1InstallsIdValuesResponse(rsp *http.Response) (*PatchV1InstallsIdValuesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchV1InstallsIdValuesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
 
 	}
 

@@ -3,6 +3,7 @@ package installs
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -12,6 +13,7 @@ import (
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/cnap-tech/cli/internal/output"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 func NewCmdInstalls() *cobra.Command {
@@ -23,7 +25,10 @@ func NewCmdInstalls() *cobra.Command {
 
 	cmd.AddCommand(newCmdList())
 	cmd.AddCommand(newCmdGet())
+	cmd.AddCommand(newCmdCreate())
 	cmd.AddCommand(newCmdDelete())
+	cmd.AddCommand(newCmdUpdateValues())
+	cmd.AddCommand(newCmdUpdateOverrides())
 	cmd.AddCommand(newCmdPods())
 	cmd.AddCommand(newCmdLogs())
 
@@ -158,6 +163,177 @@ func newCmdDelete() *cobra.Command {
 	cmd.Flags().BoolVar(&force, "force", false, "Confirm deletion")
 
 	return cmd
+}
+
+func newCmdCreate() *cobra.Command {
+	var productID, regionID string
+
+	cmd := &cobra.Command{
+		Use:   "create",
+		Short: "Create a product install",
+		Long:  "Deploys a product to a region. Starts an async workflow.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, cfg, err := cmdutil.NewClient()
+			if err != nil {
+				return err
+			}
+
+			if cfg.ActiveWorkspace == "" {
+				return fmt.Errorf("no active workspace. Run: cnap workspaces switch <id>")
+			}
+
+			body := api.PostV1InstallsJSONRequestBody{
+				ProductId: productID,
+				RegionId:  regionID,
+			}
+
+			resp, err := client.PostV1InstallsWithResponse(context.Background(), body)
+			if err != nil {
+				return fmt.Errorf("creating install: %w", err)
+			}
+			if resp.HTTPResponse.StatusCode != 202 {
+				return apiError(resp.Status(), resp.JSON401, resp.JSON403, resp.JSON422)
+			}
+
+			fmt.Println("Install workflow started.")
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVar(&productID, "product", "", "Product ID (required)")
+	cmd.Flags().StringVar(&regionID, "region", "", "Region ID (required)")
+	_ = cmd.MarkFlagRequired("product")
+	_ = cmd.MarkFlagRequired("region")
+
+	return cmd
+}
+
+func newCmdUpdateValues() *cobra.Command {
+	var sourceID, valuesFile string
+
+	cmd := &cobra.Command{
+		Use:   "update-values <install-id>",
+		Short: "Update install template values",
+		Long:  "Updates template helm source values and regenerates the chart.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := cmdutil.NewClient()
+			if err != nil {
+				return err
+			}
+
+			values, err := readValuesFile(valuesFile)
+			if err != nil {
+				return err
+			}
+
+			body := api.PatchV1InstallsIdValuesJSONRequestBody{
+				Updates: []struct {
+					TemplateHelmSourceId string                  `json:"templateHelmSourceId"`
+					Values               map[string]*interface{} `json:"values"`
+				}{
+					{
+						TemplateHelmSourceId: sourceID,
+						Values:               values,
+					},
+				},
+			}
+
+			resp, err := client.PatchV1InstallsIdValuesWithResponse(context.Background(), args[0], body)
+			if err != nil {
+				return fmt.Errorf("updating install values: %w", err)
+			}
+			if resp.HTTPResponse.StatusCode != 202 {
+				return apiError(resp.Status(), resp.JSON401, resp.JSON404, resp.JSON422)
+			}
+
+			fmt.Println("Install values update started.")
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVar(&sourceID, "source", "", "Helm source ID (required)")
+	cmd.Flags().StringVarP(&valuesFile, "values", "f", "", "Values YAML/JSON file (required)")
+	_ = cmd.MarkFlagRequired("source")
+	_ = cmd.MarkFlagRequired("values")
+
+	return cmd
+}
+
+func newCmdUpdateOverrides() *cobra.Command {
+	var sourceID, valuesFile string
+
+	cmd := &cobra.Command{
+		Use:   "update-overrides <install-id>",
+		Short: "Update install value overrides",
+		Long:  "Applies per-install value overrides on top of product base values.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := cmdutil.NewClient()
+			if err != nil {
+				return err
+			}
+
+			values, err := readValuesFile(valuesFile)
+			if err != nil {
+				return err
+			}
+
+			body := api.PatchV1InstallsIdOverridesJSONRequestBody{
+				Updates: []struct {
+					TemplateHelmSourceId string                  `json:"templateHelmSourceId"`
+					Values               map[string]*interface{} `json:"values"`
+				}{
+					{
+						TemplateHelmSourceId: sourceID,
+						Values:               values,
+					},
+				},
+			}
+
+			resp, err := client.PatchV1InstallsIdOverridesWithResponse(context.Background(), args[0], body)
+			if err != nil {
+				return fmt.Errorf("updating install overrides: %w", err)
+			}
+			if resp.HTTPResponse.StatusCode != 202 {
+				return apiError(resp.Status(), resp.JSON401, resp.JSON404, resp.JSON422)
+			}
+
+			fmt.Println("Install overrides update started.")
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVar(&sourceID, "source", "", "Helm source ID (required)")
+	cmd.Flags().StringVarP(&valuesFile, "values", "f", "", "Values YAML/JSON file (required)")
+	_ = cmd.MarkFlagRequired("source")
+	_ = cmd.MarkFlagRequired("values")
+
+	return cmd
+}
+
+func readValuesFile(path string) (map[string]*interface{}, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("reading values file: %w", err)
+	}
+
+	var raw map[string]interface{}
+
+	// Try JSON first, then YAML
+	if err := json.Unmarshal(data, &raw); err != nil {
+		if err := yaml.Unmarshal(data, &raw); err != nil {
+			return nil, fmt.Errorf("parsing values file (expected JSON or YAML): %w", err)
+		}
+	}
+
+	// Convert to map[string]*interface{} for the API client
+	result := make(map[string]*interface{}, len(raw))
+	for k, v := range raw {
+		val := v
+		result[k] = &val
+	}
+	return result, nil
 }
 
 func newCmdPods() *cobra.Command {
