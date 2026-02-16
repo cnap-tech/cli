@@ -241,7 +241,7 @@ func newCmdLogs() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("streaming logs: %w", err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != 200 {
 				return fmt.Errorf("unexpected response: %s", resp.Status)
