@@ -1,0 +1,6 @@
+# Binary
+cnap
+dist/
+
+# OS
+.DS_Store

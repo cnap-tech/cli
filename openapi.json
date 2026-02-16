@@ -1,0 +1,822 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "CNAP API",
+        "version": "1.0.0",
+        "description": "Public API for managing CNAP workspaces, clusters, templates, products, and deployments.\n\nAuthenticate with a Personal Access Token via the `Authorization: Bearer cnap_pat_...` header.\n\nWorkspace-scoped endpoints require the `X-Workspace-Id` header."
+    },
+    "servers": [
+        {
+            "url": "https://api.cnap.tech/v1",
+            "description": "Production"
+        },
+        {
+            "url": "http://localhost:5173/v1",
+            "description": "Development"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "Personal Access Token (cnap_pat_...) or OAuth2 JWT. Create tokens at https://dash.cnap.tech/settings/tokens"
+            }
+        },
+        "schemas": {
+            "ApiToken": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "My CLI token"
+                    },
+                    "prefix": {
+                        "type": "string",
+                        "example": "cnap_pat_a3b2"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)",
+                        "example": 1708000000000
+                    },
+                    "lastUsedAt": {
+                        "type": "number",
+                        "nullable": true,
+                        "description": "Unix timestamp (ms) of last use"
+                    },
+                    "expiresAt": {
+                        "type": "number",
+                        "nullable": true,
+                        "description": "Unix timestamp (ms), null if never"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "prefix",
+                    "createdAt",
+                    "lastUsedAt",
+                    "expiresAt"
+                ]
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "example": "not_found"
+                            },
+                            "message": {
+                                "type": "string",
+                                "example": "Resource not found"
+                            },
+                            "suggestion": {
+                                "type": "string",
+                                "example": "Run `cnap clusters list` to see available clusters"
+                            },
+                            "details": {
+                                "nullable": true
+                            }
+                        },
+                        "required": [
+                            "code",
+                            "message"
+                        ]
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "CreatedToken": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "token": {
+                        "type": "string",
+                        "description": "The full token. This is shown only once \u2014 store it securely.",
+                        "example": "cnap_pat_a3b2c4d5e6f7g8h9i0j1k2l3m4n5o6p7"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "token"
+                ]
+            },
+            "Workspace": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "My Workspace"
+                    },
+                    "icon": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": null
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "icon",
+                    "createdAt"
+                ]
+            },
+            "Cluster": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "production"
+                    },
+                    "workspaceId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "regionId": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "kaas": {
+                        "$ref": "#/components/schemas/KaasInfo"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "workspaceId",
+                    "regionId",
+                    "kaas",
+                    "createdAt"
+                ]
+            },
+            "KaasInfo": {
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                    "namespace": {
+                        "type": "string",
+                        "example": "clu-j572abc123def456"
+                    },
+                    "version": {
+                        "type": "string",
+                        "example": "v1.30"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PROVISIONING",
+                            "RUNNING",
+                            "RECONCILING",
+                            "DELETING",
+                            "ERROR",
+                            "DEGRADED"
+                        ],
+                        "example": "RUNNING"
+                    },
+                    "statusMessage": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": null
+                    }
+                },
+                "required": [
+                    "namespace",
+                    "version",
+                    "status",
+                    "statusMessage"
+                ],
+                "description": "Present if cluster is KaaS-managed"
+            }
+        },
+        "parameters": {}
+    },
+    "paths": {
+        "/v1/user/tokens": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "List personal access tokens",
+                "description": "Returns metadata for all tokens. Full token values are never shown after creation.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of tokens",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ApiToken"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Create a personal access token",
+                "description": "Creates a new PAT. The full token is returned in the response and never shown again.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100,
+                                        "description": "Human-readable name for the token",
+                                        "example": "My CLI token"
+                                    },
+                                    "expiresInDays": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "exclusiveMinimum": true,
+                                        "description": "Token expiry in days. Omit for no expiry."
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Token created. The `token` field is shown only once.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CreatedToken"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/tokens/{id}": {
+            "delete": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Revoke a personal access token",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Token ID"
+                        },
+                        "required": true,
+                        "description": "Token ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Token revoked"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Token not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/workspaces": {
+            "get": {
+                "tags": [
+                    "Workspaces"
+                ],
+                "summary": "List workspaces",
+                "description": "Lists all workspaces the authenticated user belongs to. No X-Workspace-Id needed.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of workspaces",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Workspace"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/workspaces/{id}": {
+            "get": {
+                "tags": [
+                    "Workspaces"
+                ],
+                "summary": "Get workspace details",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Workspace ID"
+                        },
+                        "required": true,
+                        "description": "Workspace ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Workspace details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Workspace"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not a member of this workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Workspace not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/clusters": {
+            "get": {
+                "tags": [
+                    "Clusters"
+                ],
+                "summary": "List clusters in workspace",
+                "description": "Lists all clusters in the workspace specified by the X-Workspace-Id header.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of clusters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Cluster"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/clusters/{id}": {
+            "get": {
+                "tags": [
+                    "Clusters"
+                ],
+                "summary": "Get cluster details",
+                "description": "Returns detailed information about a cluster, including KaaS status if applicable.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Cluster ID"
+                        },
+                        "required": true,
+                        "description": "Cluster ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cluster details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Cluster"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not a member of the cluster workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cluster not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Clusters"
+                ],
+                "summary": "Update cluster",
+                "description": "Update cluster name or region. The region must be in the same workspace.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Cluster ID"
+                        },
+                        "required": true,
+                        "description": "Cluster ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100,
+                                        "example": "staging"
+                                    },
+                                    "regionId": {
+                                        "type": "string",
+                                        "description": "Region ID"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated cluster",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Cluster"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not a member of the cluster workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cluster not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Clusters"
+                ],
+                "summary": "Delete cluster",
+                "description": "Deletes a cluster and its ArgoCD configuration. KaaS-managed clusters are deprovisioned. Fails if the cluster has active installations.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Cluster ID"
+                        },
+                        "required": true,
+                        "description": "Cluster ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Cluster deleted"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not a member of the cluster workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cluster not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Cluster has active installations",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
