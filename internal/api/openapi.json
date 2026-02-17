@@ -24,6 +24,24 @@
             }
         },
         "schemas": {
+            "ApiTokenList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ApiToken"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
+                ]
+            },
             "ApiToken": {
                 "type": "object",
                 "properties": {
@@ -62,6 +80,23 @@
                     "createdAt",
                     "lastUsedAt",
                     "expiresAt"
+                ]
+            },
+            "Pagination": {
+                "type": "object",
+                "properties": {
+                    "cursor": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Cursor for next page, null if no more"
+                    },
+                    "hasMore": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "cursor",
+                    "hasMore"
                 ]
             },
             "Error": {
@@ -117,6 +152,24 @@
                     "token"
                 ]
             },
+            "WorkspaceList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Workspace"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
+                ]
+            },
             "Workspace": {
                 "type": "object",
                 "properties": {
@@ -143,6 +196,24 @@
                     "name",
                     "icon",
                     "createdAt"
+                ]
+            },
+            "ClusterList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Cluster"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
                 ]
             },
             "Cluster": {
@@ -213,6 +284,24 @@
                     "statusMessage"
                 ],
                 "description": "Present if cluster is KaaS-managed"
+            },
+            "TemplateList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Template"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
+                ]
             },
             "Template": {
                 "type": "object",
@@ -327,6 +416,24 @@
                     "targetRevision"
                 ]
             },
+            "ProductList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Product"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
+                ]
+            },
             "Product": {
                 "type": "object",
                 "properties": {
@@ -373,6 +480,24 @@
                     "templateId",
                     "settings",
                     "createdAt"
+                ]
+            },
+            "InstallList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Install"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
                 ]
             },
             "Install": {
@@ -442,6 +567,24 @@
                     "containers"
                 ]
             },
+            "RegionList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Region"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
+                ]
+            },
             "Region": {
                 "type": "object",
                 "properties": {
@@ -473,6 +616,24 @@
                     "icon",
                     "workspaceId",
                     "createdAt"
+                ]
+            },
+            "RegistryCredentialList": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RegistryCredential"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/Pagination"
+                    }
+                },
+                "required": [
+                    "data",
+                    "pagination"
                 ]
             },
             "RegistryCredential": {
@@ -539,24 +700,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of tokens",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ApiToken"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/ApiTokenList"
                                 }
                             }
                         }
@@ -705,24 +881,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of workspaces",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Workspace"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/WorkspaceList"
                                 }
                             }
                         }
@@ -827,24 +1018,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of clusters",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Cluster"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/ClusterList"
                                 }
                             }
                         }
@@ -1133,24 +1339,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of templates",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Template"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/TemplateList"
                                 }
                             }
                         }
@@ -1771,24 +1992,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of products",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Product"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/ProductList"
                                 }
                             }
                         }
@@ -2299,24 +2535,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of installs",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Install"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/InstallList"
                                 }
                             }
                         }
@@ -3059,24 +3310,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of regions",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Region"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/RegionList"
                                 }
                             }
                         }
@@ -3203,24 +3469,39 @@
                         "BearerAuth": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Pagination cursor from previous response"
+                        },
+                        "required": false,
+                        "description": "Pagination cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 50,
+                            "description": "Items per page (1-100)",
+                            "example": 50
+                        },
+                        "required": false,
+                        "description": "Items per page (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of credentials",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/RegistryCredential"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/RegistryCredentialList"
                                 }
                             }
                         }

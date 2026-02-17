@@ -89,6 +89,12 @@ type ApiToken struct {
 	Prefix     string   `json:"prefix"`
 }
 
+// ApiTokenList defines model for ApiTokenList.
+type ApiTokenList struct {
+	Data       []ApiToken `json:"data"`
+	Pagination Pagination `json:"pagination"`
+}
+
 // Cluster defines model for Cluster.
 type Cluster struct {
 	// CreatedAt Unix timestamp (ms)
@@ -100,6 +106,12 @@ type Cluster struct {
 	Name        string    `json:"name"`
 	RegionId    string    `json:"regionId"`
 	WorkspaceId string    `json:"workspaceId"`
+}
+
+// ClusterList defines model for ClusterList.
+type ClusterList struct {
+	Data       []Cluster  `json:"data"`
+	Pagination Pagination `json:"pagination"`
 }
 
 // CreatedToken defines model for CreatedToken.
@@ -154,6 +166,12 @@ type Install struct {
 	WorkspaceId string  `json:"workspaceId"`
 }
 
+// InstallList defines model for InstallList.
+type InstallList struct {
+	Data       []Install  `json:"data"`
+	Pagination Pagination `json:"pagination"`
+}
+
 // KaasInfo Present if cluster is KaaS-managed
 type KaasInfo struct {
 	Status        KaasInfoStatus `json:"status"`
@@ -163,6 +181,13 @@ type KaasInfo struct {
 
 // KaasInfoStatus defines model for KaasInfo.Status.
 type KaasInfoStatus string
+
+// Pagination defines model for Pagination.
+type Pagination struct {
+	// Cursor Cursor for next page, null if no more
+	Cursor  *string `json:"cursor"`
+	HasMore bool    `json:"hasMore"`
+}
 
 // Pod defines model for Pod.
 type Pod struct {
@@ -185,6 +210,12 @@ type Product struct {
 	WorkspaceId string `json:"workspaceId"`
 }
 
+// ProductList defines model for ProductList.
+type ProductList struct {
+	Data       []Product  `json:"data"`
+	Pagination Pagination `json:"pagination"`
+}
+
 // Region defines model for Region.
 type Region struct {
 	// CreatedAt Unix timestamp (ms)
@@ -195,6 +226,12 @@ type Region struct {
 	Id          string  `json:"id"`
 	Name        string  `json:"name"`
 	WorkspaceId string  `json:"workspaceId"`
+}
+
+// RegionList defines model for RegionList.
+type RegionList struct {
+	Data       []Region   `json:"data"`
+	Pagination Pagination `json:"pagination"`
 }
 
 // RegistryCredential defines model for RegistryCredential.
@@ -217,6 +254,12 @@ type RegistryCredential struct {
 
 // RegistryCredentialType Auth type
 type RegistryCredentialType string
+
+// RegistryCredentialList defines model for RegistryCredentialList.
+type RegistryCredentialList struct {
+	Data       []RegistryCredential `json:"data"`
+	Pagination Pagination           `json:"pagination"`
+}
 
 // Template defines model for Template.
 type Template struct {
@@ -245,6 +288,12 @@ type TemplateDetail struct {
 // TemplateDetailRegistryProxyMode defines model for TemplateDetail.RegistryProxyMode.
 type TemplateDetailRegistryProxyMode string
 
+// TemplateList defines model for TemplateList.
+type TemplateList struct {
+	Data       []Template `json:"data"`
+	Pagination Pagination `json:"pagination"`
+}
+
 // Workspace defines model for Workspace.
 type Workspace struct {
 	// CreatedAt Unix timestamp (ms)
@@ -254,12 +303,36 @@ type Workspace struct {
 	Name      string  `json:"name"`
 }
 
+// WorkspaceList defines model for WorkspaceList.
+type WorkspaceList struct {
+	Data       []Workspace `json:"data"`
+	Pagination Pagination  `json:"pagination"`
+}
+
+// GetV1ClustersParams defines parameters for GetV1Clusters.
+type GetV1ClustersParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // PatchV1ClustersIdJSONBody defines parameters for PatchV1ClustersId.
 type PatchV1ClustersIdJSONBody struct {
 	Name *string `json:"name,omitempty"`
 
 	// RegionId Region ID
 	RegionId *string `json:"regionId,omitempty"`
+}
+
+// GetV1InstallsParams defines parameters for GetV1Installs.
+type GetV1InstallsParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
 // PostV1InstallsJSONBody defines parameters for PostV1Installs.
@@ -337,6 +410,15 @@ type PatchV1InstallsIdValuesJSONBody struct {
 	} `json:"updates"`
 }
 
+// GetV1ProductsParams defines parameters for GetV1Products.
+type GetV1ProductsParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // PostV1ProductsJSONBody defines parameters for PostV1Products.
 type PostV1ProductsJSONBody struct {
 	// ClusterIds Cluster IDs to deploy to
@@ -382,11 +464,29 @@ type PatchV1ProductsIdJSONBody struct {
 	StripePriceIds *[]string `json:"stripePriceIds,omitempty"`
 }
 
+// GetV1RegionsParams defines parameters for GetV1Regions.
+type GetV1RegionsParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // PostV1RegionsJSONBody defines parameters for PostV1Regions.
 type PostV1RegionsJSONBody struct {
 	// Icon Icon URL
 	Icon *string `json:"icon,omitempty"`
 	Name string  `json:"name"`
+}
+
+// GetV1RegistryCredentialsParams defines parameters for GetV1RegistryCredentials.
+type GetV1RegistryCredentialsParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
 // PostV1RegistryCredentialsJSONBody defines parameters for PostV1RegistryCredentials.
@@ -409,6 +509,15 @@ type PostV1RegistryCredentialsJSONBody struct {
 
 // PostV1RegistryCredentialsJSONBodyType defines parameters for PostV1RegistryCredentials.
 type PostV1RegistryCredentialsJSONBodyType string
+
+// GetV1TemplatesParams defines parameters for GetV1Templates.
+type GetV1TemplatesParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
 
 // PostV1TemplatesJSONBody defines parameters for PostV1Templates.
 type PostV1TemplatesJSONBody struct {
@@ -494,6 +603,15 @@ type PatchV1TemplatesIdJSONBody struct {
 // PatchV1TemplatesIdJSONBodyRegistryProxyMode defines parameters for PatchV1TemplatesId.
 type PatchV1TemplatesIdJSONBodyRegistryProxyMode string
 
+// GetV1UserTokensParams defines parameters for GetV1UserTokens.
+type GetV1UserTokensParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // PostV1UserTokensJSONBody defines parameters for PostV1UserTokens.
 type PostV1UserTokensJSONBody struct {
 	// ExpiresInDays Token expiry in days. Omit for no expiry.
@@ -501,6 +619,15 @@ type PostV1UserTokensJSONBody struct {
 
 	// Name Human-readable name for the token
 	Name string `json:"name"`
+}
+
+// GetV1WorkspacesParams defines parameters for GetV1Workspaces.
+type GetV1WorkspacesParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
 // PatchV1ClustersIdJSONRequestBody defines body for PatchV1ClustersId for application/json ContentType.
@@ -613,7 +740,7 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 // The interface specification for the client above.
 type ClientInterface interface {
 	// GetV1Clusters request
-	GetV1Clusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1Clusters(ctx context.Context, params *GetV1ClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteV1ClustersId request
 	DeleteV1ClustersId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -627,7 +754,7 @@ type ClientInterface interface {
 	PatchV1ClustersId(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Installs request
-	GetV1Installs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1Installs(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1InstallsWithBody request with any body
 	PostV1InstallsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -662,7 +789,7 @@ type ClientInterface interface {
 	PatchV1InstallsIdValues(ctx context.Context, id string, body PatchV1InstallsIdValuesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Products request
-	GetV1Products(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1Products(ctx context.Context, params *GetV1ProductsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1ProductsWithBody request with any body
 	PostV1ProductsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -681,7 +808,7 @@ type ClientInterface interface {
 	PatchV1ProductsId(ctx context.Context, id string, body PatchV1ProductsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Regions request
-	GetV1Regions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1Regions(ctx context.Context, params *GetV1RegionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1RegionsWithBody request with any body
 	PostV1RegionsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -689,7 +816,7 @@ type ClientInterface interface {
 	PostV1Regions(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1RegistryCredentials request
-	GetV1RegistryCredentials(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1RegistryCredentials(ctx context.Context, params *GetV1RegistryCredentialsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1RegistryCredentialsWithBody request with any body
 	PostV1RegistryCredentialsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -700,7 +827,7 @@ type ClientInterface interface {
 	DeleteV1RegistryCredentialsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Templates request
-	GetV1Templates(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1Templates(ctx context.Context, params *GetV1TemplatesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1TemplatesWithBody request with any body
 	PostV1TemplatesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -719,7 +846,7 @@ type ClientInterface interface {
 	PatchV1TemplatesId(ctx context.Context, id string, body PatchV1TemplatesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1UserTokens request
-	GetV1UserTokens(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1UserTokens(ctx context.Context, params *GetV1UserTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1UserTokensWithBody request with any body
 	PostV1UserTokensWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -730,14 +857,14 @@ type ClientInterface interface {
 	DeleteV1UserTokensId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Workspaces request
-	GetV1Workspaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetV1Workspaces(ctx context.Context, params *GetV1WorkspacesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1WorkspacesId request
 	GetV1WorkspacesId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) GetV1Clusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1ClustersRequest(c.Server)
+func (c *Client) GetV1Clusters(ctx context.Context, params *GetV1ClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1ClustersRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -796,8 +923,8 @@ func (c *Client) PatchV1ClustersId(ctx context.Context, id string, body PatchV1C
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetV1Installs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1InstallsRequest(c.Server)
+func (c *Client) GetV1Installs(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1InstallsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -952,8 +1079,8 @@ func (c *Client) PatchV1InstallsIdValues(ctx context.Context, id string, body Pa
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetV1Products(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1ProductsRequest(c.Server)
+func (c *Client) GetV1Products(ctx context.Context, params *GetV1ProductsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1ProductsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1036,8 +1163,8 @@ func (c *Client) PatchV1ProductsId(ctx context.Context, id string, body PatchV1P
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetV1Regions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1RegionsRequest(c.Server)
+func (c *Client) GetV1Regions(ctx context.Context, params *GetV1RegionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1RegionsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1072,8 +1199,8 @@ func (c *Client) PostV1Regions(ctx context.Context, body PostV1RegionsJSONReques
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetV1RegistryCredentials(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1RegistryCredentialsRequest(c.Server)
+func (c *Client) GetV1RegistryCredentials(ctx context.Context, params *GetV1RegistryCredentialsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1RegistryCredentialsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1120,8 +1247,8 @@ func (c *Client) DeleteV1RegistryCredentialsId(ctx context.Context, id string, r
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetV1Templates(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1TemplatesRequest(c.Server)
+func (c *Client) GetV1Templates(ctx context.Context, params *GetV1TemplatesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1TemplatesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1204,8 +1331,8 @@ func (c *Client) PatchV1TemplatesId(ctx context.Context, id string, body PatchV1
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetV1UserTokens(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1UserTokensRequest(c.Server)
+func (c *Client) GetV1UserTokens(ctx context.Context, params *GetV1UserTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1UserTokensRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1252,8 +1379,8 @@ func (c *Client) DeleteV1UserTokensId(ctx context.Context, id string, reqEditors
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetV1Workspaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1WorkspacesRequest(c.Server)
+func (c *Client) GetV1Workspaces(ctx context.Context, params *GetV1WorkspacesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1WorkspacesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1277,7 +1404,7 @@ func (c *Client) GetV1WorkspacesId(ctx context.Context, id string, reqEditors ..
 }
 
 // NewGetV1ClustersRequest generates requests for GetV1Clusters
-func NewGetV1ClustersRequest(server string) (*http.Request, error) {
+func NewGetV1ClustersRequest(server string, params *GetV1ClustersParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1293,6 +1420,44 @@ func NewGetV1ClustersRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -1419,7 +1584,7 @@ func NewPatchV1ClustersIdRequestWithBody(server string, id string, contentType s
 }
 
 // NewGetV1InstallsRequest generates requests for GetV1Installs
-func NewGetV1InstallsRequest(server string) (*http.Request, error) {
+func NewGetV1InstallsRequest(server string, params *GetV1InstallsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1435,6 +1600,44 @@ func NewGetV1InstallsRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -1842,7 +2045,7 @@ func NewPatchV1InstallsIdValuesRequestWithBody(server string, id string, content
 }
 
 // NewGetV1ProductsRequest generates requests for GetV1Products
-func NewGetV1ProductsRequest(server string) (*http.Request, error) {
+func NewGetV1ProductsRequest(server string, params *GetV1ProductsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1858,6 +2061,44 @@ func NewGetV1ProductsRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -2024,7 +2265,7 @@ func NewPatchV1ProductsIdRequestWithBody(server string, id string, contentType s
 }
 
 // NewGetV1RegionsRequest generates requests for GetV1Regions
-func NewGetV1RegionsRequest(server string) (*http.Request, error) {
+func NewGetV1RegionsRequest(server string, params *GetV1RegionsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2040,6 +2281,44 @@ func NewGetV1RegionsRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -2091,7 +2370,7 @@ func NewPostV1RegionsRequestWithBody(server string, contentType string, body io.
 }
 
 // NewGetV1RegistryCredentialsRequest generates requests for GetV1RegistryCredentials
-func NewGetV1RegistryCredentialsRequest(server string) (*http.Request, error) {
+func NewGetV1RegistryCredentialsRequest(server string, params *GetV1RegistryCredentialsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2107,6 +2386,44 @@ func NewGetV1RegistryCredentialsRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -2192,7 +2509,7 @@ func NewDeleteV1RegistryCredentialsIdRequest(server string, id string) (*http.Re
 }
 
 // NewGetV1TemplatesRequest generates requests for GetV1Templates
-func NewGetV1TemplatesRequest(server string) (*http.Request, error) {
+func NewGetV1TemplatesRequest(server string, params *GetV1TemplatesParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2208,6 +2525,44 @@ func NewGetV1TemplatesRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -2374,7 +2729,7 @@ func NewPatchV1TemplatesIdRequestWithBody(server string, id string, contentType 
 }
 
 // NewGetV1UserTokensRequest generates requests for GetV1UserTokens
-func NewGetV1UserTokensRequest(server string) (*http.Request, error) {
+func NewGetV1UserTokensRequest(server string, params *GetV1UserTokensParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2390,6 +2745,44 @@ func NewGetV1UserTokensRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -2475,7 +2868,7 @@ func NewDeleteV1UserTokensIdRequest(server string, id string) (*http.Request, er
 }
 
 // NewGetV1WorkspacesRequest generates requests for GetV1Workspaces
-func NewGetV1WorkspacesRequest(server string) (*http.Request, error) {
+func NewGetV1WorkspacesRequest(server string, params *GetV1WorkspacesParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2491,6 +2884,44 @@ func NewGetV1WorkspacesRequest(server string) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -2579,7 +3010,7 @@ func WithBaseURL(baseURL string) ClientOption {
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 	// GetV1ClustersWithResponse request
-	GetV1ClustersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ClustersResponse, error)
+	GetV1ClustersWithResponse(ctx context.Context, params *GetV1ClustersParams, reqEditors ...RequestEditorFn) (*GetV1ClustersResponse, error)
 
 	// DeleteV1ClustersIdWithResponse request
 	DeleteV1ClustersIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1ClustersIdResponse, error)
@@ -2593,7 +3024,7 @@ type ClientWithResponsesInterface interface {
 	PatchV1ClustersIdWithResponse(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1ClustersIdResponse, error)
 
 	// GetV1InstallsWithResponse request
-	GetV1InstallsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error)
+	GetV1InstallsWithResponse(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error)
 
 	// PostV1InstallsWithBodyWithResponse request with any body
 	PostV1InstallsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error)
@@ -2628,7 +3059,7 @@ type ClientWithResponsesInterface interface {
 	PatchV1InstallsIdValuesWithResponse(ctx context.Context, id string, body PatchV1InstallsIdValuesJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1InstallsIdValuesResponse, error)
 
 	// GetV1ProductsWithResponse request
-	GetV1ProductsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProductsResponse, error)
+	GetV1ProductsWithResponse(ctx context.Context, params *GetV1ProductsParams, reqEditors ...RequestEditorFn) (*GetV1ProductsResponse, error)
 
 	// PostV1ProductsWithBodyWithResponse request with any body
 	PostV1ProductsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1ProductsResponse, error)
@@ -2647,7 +3078,7 @@ type ClientWithResponsesInterface interface {
 	PatchV1ProductsIdWithResponse(ctx context.Context, id string, body PatchV1ProductsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1ProductsIdResponse, error)
 
 	// GetV1RegionsWithResponse request
-	GetV1RegionsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegionsResponse, error)
+	GetV1RegionsWithResponse(ctx context.Context, params *GetV1RegionsParams, reqEditors ...RequestEditorFn) (*GetV1RegionsResponse, error)
 
 	// PostV1RegionsWithBodyWithResponse request with any body
 	PostV1RegionsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error)
@@ -2655,7 +3086,7 @@ type ClientWithResponsesInterface interface {
 	PostV1RegionsWithResponse(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error)
 
 	// GetV1RegistryCredentialsWithResponse request
-	GetV1RegistryCredentialsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegistryCredentialsResponse, error)
+	GetV1RegistryCredentialsWithResponse(ctx context.Context, params *GetV1RegistryCredentialsParams, reqEditors ...RequestEditorFn) (*GetV1RegistryCredentialsResponse, error)
 
 	// PostV1RegistryCredentialsWithBodyWithResponse request with any body
 	PostV1RegistryCredentialsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1RegistryCredentialsResponse, error)
@@ -2666,7 +3097,7 @@ type ClientWithResponsesInterface interface {
 	DeleteV1RegistryCredentialsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1RegistryCredentialsIdResponse, error)
 
 	// GetV1TemplatesWithResponse request
-	GetV1TemplatesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error)
+	GetV1TemplatesWithResponse(ctx context.Context, params *GetV1TemplatesParams, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error)
 
 	// PostV1TemplatesWithBodyWithResponse request with any body
 	PostV1TemplatesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1TemplatesResponse, error)
@@ -2685,7 +3116,7 @@ type ClientWithResponsesInterface interface {
 	PatchV1TemplatesIdWithResponse(ctx context.Context, id string, body PatchV1TemplatesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1TemplatesIdResponse, error)
 
 	// GetV1UserTokensWithResponse request
-	GetV1UserTokensWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1UserTokensResponse, error)
+	GetV1UserTokensWithResponse(ctx context.Context, params *GetV1UserTokensParams, reqEditors ...RequestEditorFn) (*GetV1UserTokensResponse, error)
 
 	// PostV1UserTokensWithBodyWithResponse request with any body
 	PostV1UserTokensWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1UserTokensResponse, error)
@@ -2696,7 +3127,7 @@ type ClientWithResponsesInterface interface {
 	DeleteV1UserTokensIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1UserTokensIdResponse, error)
 
 	// GetV1WorkspacesWithResponse request
-	GetV1WorkspacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1WorkspacesResponse, error)
+	GetV1WorkspacesWithResponse(ctx context.Context, params *GetV1WorkspacesParams, reqEditors ...RequestEditorFn) (*GetV1WorkspacesResponse, error)
 
 	// GetV1WorkspacesIdWithResponse request
 	GetV1WorkspacesIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1WorkspacesIdResponse, error)
@@ -2705,11 +3136,9 @@ type ClientWithResponsesInterface interface {
 type GetV1ClustersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []Cluster `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
+	JSON200      *ClusterList
+	JSON401      *Error
+	JSON403      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -2811,11 +3240,9 @@ func (r PatchV1ClustersIdResponse) StatusCode() int {
 type GetV1InstallsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []Install `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
+	JSON200      *InstallList
+	JSON401      *Error
+	JSON403      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3031,11 +3458,9 @@ func (r PatchV1InstallsIdValuesResponse) StatusCode() int {
 type GetV1ProductsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []Product `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
+	JSON200      *ProductList
+	JSON401      *Error
+	JSON403      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3167,11 +3592,9 @@ func (r PatchV1ProductsIdResponse) StatusCode() int {
 type GetV1RegionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []Region `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
+	JSON200      *RegionList
+	JSON401      *Error
+	JSON403      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3220,11 +3643,9 @@ func (r PostV1RegionsResponse) StatusCode() int {
 type GetV1RegistryCredentialsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []RegistryCredential `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
+	JSON200      *RegistryCredentialList
+	JSON401      *Error
+	JSON403      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3293,11 +3714,9 @@ func (r DeleteV1RegistryCredentialsIdResponse) StatusCode() int {
 type GetV1TemplatesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []Template `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
+	JSON200      *TemplateList
+	JSON401      *Error
+	JSON403      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3427,10 +3846,8 @@ func (r PatchV1TemplatesIdResponse) StatusCode() int {
 type GetV1UserTokensResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []ApiToken `json:"data"`
-	}
-	JSON401 *Error
+	JSON200      *ApiTokenList
+	JSON401      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3500,10 +3917,8 @@ func (r DeleteV1UserTokensIdResponse) StatusCode() int {
 type GetV1WorkspacesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data []Workspace `json:"data"`
-	}
-	JSON401 *Error
+	JSON200      *WorkspaceList
+	JSON401      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3550,8 +3965,8 @@ func (r GetV1WorkspacesIdResponse) StatusCode() int {
 }
 
 // GetV1ClustersWithResponse request returning *GetV1ClustersResponse
-func (c *ClientWithResponses) GetV1ClustersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ClustersResponse, error) {
-	rsp, err := c.GetV1Clusters(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1ClustersWithResponse(ctx context.Context, params *GetV1ClustersParams, reqEditors ...RequestEditorFn) (*GetV1ClustersResponse, error) {
+	rsp, err := c.GetV1Clusters(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3594,8 +4009,8 @@ func (c *ClientWithResponses) PatchV1ClustersIdWithResponse(ctx context.Context,
 }
 
 // GetV1InstallsWithResponse request returning *GetV1InstallsResponse
-func (c *ClientWithResponses) GetV1InstallsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error) {
-	rsp, err := c.GetV1Installs(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1InstallsWithResponse(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error) {
+	rsp, err := c.GetV1Installs(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3707,8 +4122,8 @@ func (c *ClientWithResponses) PatchV1InstallsIdValuesWithResponse(ctx context.Co
 }
 
 // GetV1ProductsWithResponse request returning *GetV1ProductsResponse
-func (c *ClientWithResponses) GetV1ProductsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProductsResponse, error) {
-	rsp, err := c.GetV1Products(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1ProductsWithResponse(ctx context.Context, params *GetV1ProductsParams, reqEditors ...RequestEditorFn) (*GetV1ProductsResponse, error) {
+	rsp, err := c.GetV1Products(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3768,8 +4183,8 @@ func (c *ClientWithResponses) PatchV1ProductsIdWithResponse(ctx context.Context,
 }
 
 // GetV1RegionsWithResponse request returning *GetV1RegionsResponse
-func (c *ClientWithResponses) GetV1RegionsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegionsResponse, error) {
-	rsp, err := c.GetV1Regions(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1RegionsWithResponse(ctx context.Context, params *GetV1RegionsParams, reqEditors ...RequestEditorFn) (*GetV1RegionsResponse, error) {
+	rsp, err := c.GetV1Regions(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3794,8 +4209,8 @@ func (c *ClientWithResponses) PostV1RegionsWithResponse(ctx context.Context, bod
 }
 
 // GetV1RegistryCredentialsWithResponse request returning *GetV1RegistryCredentialsResponse
-func (c *ClientWithResponses) GetV1RegistryCredentialsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegistryCredentialsResponse, error) {
-	rsp, err := c.GetV1RegistryCredentials(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1RegistryCredentialsWithResponse(ctx context.Context, params *GetV1RegistryCredentialsParams, reqEditors ...RequestEditorFn) (*GetV1RegistryCredentialsResponse, error) {
+	rsp, err := c.GetV1RegistryCredentials(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3829,8 +4244,8 @@ func (c *ClientWithResponses) DeleteV1RegistryCredentialsIdWithResponse(ctx cont
 }
 
 // GetV1TemplatesWithResponse request returning *GetV1TemplatesResponse
-func (c *ClientWithResponses) GetV1TemplatesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error) {
-	rsp, err := c.GetV1Templates(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1TemplatesWithResponse(ctx context.Context, params *GetV1TemplatesParams, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error) {
+	rsp, err := c.GetV1Templates(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3890,8 +4305,8 @@ func (c *ClientWithResponses) PatchV1TemplatesIdWithResponse(ctx context.Context
 }
 
 // GetV1UserTokensWithResponse request returning *GetV1UserTokensResponse
-func (c *ClientWithResponses) GetV1UserTokensWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1UserTokensResponse, error) {
-	rsp, err := c.GetV1UserTokens(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1UserTokensWithResponse(ctx context.Context, params *GetV1UserTokensParams, reqEditors ...RequestEditorFn) (*GetV1UserTokensResponse, error) {
+	rsp, err := c.GetV1UserTokens(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3925,8 +4340,8 @@ func (c *ClientWithResponses) DeleteV1UserTokensIdWithResponse(ctx context.Conte
 }
 
 // GetV1WorkspacesWithResponse request returning *GetV1WorkspacesResponse
-func (c *ClientWithResponses) GetV1WorkspacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1WorkspacesResponse, error) {
-	rsp, err := c.GetV1Workspaces(ctx, reqEditors...)
+func (c *ClientWithResponses) GetV1WorkspacesWithResponse(ctx context.Context, params *GetV1WorkspacesParams, reqEditors ...RequestEditorFn) (*GetV1WorkspacesResponse, error) {
+	rsp, err := c.GetV1Workspaces(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3957,9 +4372,7 @@ func ParseGetV1ClustersResponse(rsp *http.Response) (*GetV1ClustersResponse, err
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []Cluster `json:"data"`
-		}
+		var dest ClusterList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4151,9 +4564,7 @@ func ParseGetV1InstallsResponse(rsp *http.Response) (*GetV1InstallsResponse, err
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []Install `json:"data"`
-		}
+		var dest InstallList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4503,9 +4914,7 @@ func ParseGetV1ProductsResponse(rsp *http.Response) (*GetV1ProductsResponse, err
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []Product `json:"data"`
-		}
+		var dest ProductList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4731,9 +5140,7 @@ func ParseGetV1RegionsResponse(rsp *http.Response) (*GetV1RegionsResponse, error
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []Region `json:"data"`
-		}
+		var dest RegionList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4822,9 +5229,7 @@ func ParseGetV1RegistryCredentialsResponse(rsp *http.Response) (*GetV1RegistryCr
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []RegistryCredential `json:"data"`
-		}
+		var dest RegistryCredentialList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4937,9 +5342,7 @@ func ParseGetV1TemplatesResponse(rsp *http.Response) (*GetV1TemplatesResponse, e
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []Template `json:"data"`
-		}
+		var dest TemplateList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5163,9 +5566,7 @@ func ParseGetV1UserTokensResponse(rsp *http.Response) (*GetV1UserTokensResponse,
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []ApiToken `json:"data"`
-		}
+		var dest ApiTokenList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5266,9 +5667,7 @@ func ParseGetV1WorkspacesResponse(rsp *http.Response) (*GetV1WorkspacesResponse,
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data []Workspace `json:"data"`
-		}
+		var dest WorkspaceList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

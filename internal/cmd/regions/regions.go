@@ -25,7 +25,10 @@ func NewCmdRegions() *cobra.Command {
 }
 
 func newCmdList() *cobra.Command {
-	return &cobra.Command{
+	var limit int
+	var cursor string
+
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List regions in the active workspace",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -38,7 +41,12 @@ func newCmdList() *cobra.Command {
 				return fmt.Errorf("no active workspace. Run: cnap workspaces switch <id>")
 			}
 
-			resp, err := client.GetV1RegionsWithResponse(context.Background())
+			params := &api.GetV1RegionsParams{Limit: &limit}
+			if cursor != "" {
+				params.Cursor = &cursor
+			}
+
+			resp, err := client.GetV1RegionsWithResponse(context.Background(), params)
 			if err != nil {
 				return fmt.Errorf("fetching regions: %w", err)
 			}
@@ -48,7 +56,7 @@ func newCmdList() *cobra.Command {
 
 			format := cmdutil.GetOutputFormat(cfg)
 			if format == output.FormatJSON {
-				return output.PrintJSON(resp.JSON200.Data)
+				return output.PrintJSON(resp.JSON200)
 			}
 
 			if len(resp.JSON200.Data) == 0 {
@@ -67,9 +75,17 @@ func newCmdList() *cobra.Command {
 			}
 
 			output.PrintTable(header, rows)
+			if resp.JSON200.Pagination.HasMore {
+				fmt.Printf("\nMore results available. Use --cursor %s to see next page.\n", *resp.JSON200.Pagination.Cursor)
+			}
 			return nil
 		},
 	}
+
+	cmd.Flags().IntVar(&limit, "limit", 50, "Items per page (1-100)")
+	cmd.Flags().StringVar(&cursor, "cursor", "", "Pagination cursor from previous response")
+
+	return cmd
 }
 
 func newCmdCreate() *cobra.Command {

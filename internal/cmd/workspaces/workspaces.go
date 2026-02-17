@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/cnap-tech/cli/internal/api"
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/cnap-tech/cli/internal/config"
 	"github.com/cnap-tech/cli/internal/output"
@@ -24,7 +25,10 @@ func NewCmdWorkspaces() *cobra.Command {
 }
 
 func newCmdList() *cobra.Command {
-	return &cobra.Command{
+	var limit int
+	var cursor string
+
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List your workspaces",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -33,7 +37,12 @@ func newCmdList() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.GetV1WorkspacesWithResponse(context.Background())
+			params := &api.GetV1WorkspacesParams{Limit: &limit}
+			if cursor != "" {
+				params.Cursor = &cursor
+			}
+
+			resp, err := client.GetV1WorkspacesWithResponse(context.Background(), params)
 			if err != nil {
 				return fmt.Errorf("fetching workspaces: %w", err)
 			}
@@ -43,7 +52,7 @@ func newCmdList() *cobra.Command {
 
 			format := cmdutil.GetOutputFormat(cfg)
 			if format == output.FormatJSON {
-				return output.PrintJSON(resp.JSON200.Data)
+				return output.PrintJSON(resp.JSON200)
 			}
 
 			header := []string{"ID", "NAME"}
@@ -56,9 +65,17 @@ func newCmdList() *cobra.Command {
 				rows = append(rows, []string{w.Id, w.Name + active})
 			}
 			output.PrintTable(header, rows)
+			if resp.JSON200.Pagination.HasMore {
+				fmt.Printf("\nMore results available. Use --cursor %s to see next page.\n", *resp.JSON200.Pagination.Cursor)
+			}
 			return nil
 		},
 	}
+
+	cmd.Flags().IntVar(&limit, "limit", 50, "Items per page (1-100)")
+	cmd.Flags().StringVar(&cursor, "cursor", "", "Pagination cursor from previous response")
+
+	return cmd
 }
 
 func newCmdSwitch() *cobra.Command {
