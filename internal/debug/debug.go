@@ -18,7 +18,7 @@ var Enabled bool
 func Init(flagEnabled bool) {
 	Enabled = flagEnabled || os.Getenv("CNAP_DEBUG") != ""
 
-	var w io.Writer = io.Discard
+	w := io.Discard
 	level := slog.LevelWarn
 	if Enabled {
 		w = os.Stderr
