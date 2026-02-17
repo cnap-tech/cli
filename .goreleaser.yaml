@@ -37,6 +37,9 @@ brews:
     license: Apache-2.0
     install: |
       bin.install "cnap"
+      generate_completions_from_executable(bin/"cnap", "completion")
+    test: |
+      assert_match version.to_s, shell_output("#{bin}/cnap --version")
 
 checksum:
   name_template: checksums.txt
