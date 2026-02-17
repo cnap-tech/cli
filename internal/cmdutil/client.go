@@ -34,7 +34,7 @@ func NewClient() (*api.ClientWithResponses, *config.Config, error) {
 		return nil, nil, fmt.Errorf("not authenticated. Run: cnap auth login --token <your-token>")
 	}
 
-	baseURL := cfg.BaseURL() + "/v1"
+	baseURL := cfg.BaseURL()
 
 	client, err := api.NewClientWithResponses(baseURL, api.WithRequestEditorFn(
 		func(_ context.Context, req *http.Request) error {
