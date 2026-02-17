@@ -8,6 +8,7 @@ import (
 	installscmd "github.com/cnap-tech/cli/internal/cmd/installs"
 	productscmd "github.com/cnap-tech/cli/internal/cmd/products"
 	regionscmd "github.com/cnap-tech/cli/internal/cmd/regions"
+	registrycmd "github.com/cnap-tech/cli/internal/cmd/registry"
 	templatescmd "github.com/cnap-tech/cli/internal/cmd/templates"
 	workspacescmd "github.com/cnap-tech/cli/internal/cmd/workspaces"
 	"github.com/cnap-tech/cli/internal/cmdutil"
@@ -46,6 +47,7 @@ Authenticate with a Personal Access Token or via browser login.`,
 	root.AddCommand(productscmd.NewCmdProducts())
 	root.AddCommand(installscmd.NewCmdInstalls())
 	root.AddCommand(regionscmd.NewCmdRegions())
+	root.AddCommand(registrycmd.NewCmdRegistry())
 
 	return root
 }

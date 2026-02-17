@@ -474,6 +474,54 @@
                     "workspaceId",
                     "createdAt"
                 ]
+            },
+            "RegistryCredential": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "j572abc123def456"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "GitHub Container Registry"
+                    },
+                    "registryUrl": {
+                        "type": "string",
+                        "example": "ghcr.io"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "basic",
+                            "token",
+                            "oauth"
+                        ],
+                        "description": "Auth type"
+                    },
+                    "isActive": {
+                        "type": "boolean",
+                        "description": "Whether the credential is active"
+                    },
+                    "createdAt": {
+                        "type": "number",
+                        "description": "Unix timestamp (ms)"
+                    },
+                    "lastUsedAt": {
+                        "type": "number",
+                        "nullable": true,
+                        "description": "Last used timestamp (ms)"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "registryUrl",
+                    "type",
+                    "isActive",
+                    "createdAt",
+                    "lastUsedAt"
+                ]
             }
         },
         "parameters": {}
@@ -3132,6 +3180,220 @@
                     },
                     "422": {
                         "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/registry/credentials": {
+            "get": {
+                "tags": [
+                    "Registry"
+                ],
+                "summary": "List registry credentials",
+                "description": "Returns credentials for the workspace. Credential secrets are never exposed.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegistryCredential"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Registry"
+                ],
+                "summary": "Create registry credential",
+                "description": "Adds a registry credential to the workspace for OCI proxy authentication.",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "example": "GitHub Container Registry"
+                                    },
+                                    "registryUrl": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "example": "ghcr.io"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "basic",
+                                            "token",
+                                            "oauth"
+                                        ],
+                                        "description": "Auth type"
+                                    },
+                                    "credentials": {
+                                        "type": "object",
+                                        "properties": {
+                                            "username": {
+                                                "type": "string"
+                                            },
+                                            "password": {
+                                                "type": "string"
+                                            },
+                                            "token": {
+                                                "type": "string"
+                                            },
+                                            "clientId": {
+                                                "type": "string"
+                                            },
+                                            "clientSecret": {
+                                                "type": "string"
+                                            },
+                                            "tokenUrl": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "description": "Auth credentials (type-dependent)"
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "registryUrl",
+                                    "type",
+                                    "credentials"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Credential created"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Missing or invalid workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/registry/credentials/{id}": {
+            "delete": {
+                "tags": [
+                    "Registry"
+                ],
+                "summary": "Delete registry credential",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "description": "Credential ID"
+                        },
+                        "required": true,
+                        "description": "Credential ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Credential deleted"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Credential not found",
                         "content": {
                             "application/json": {
                                 "schema": {

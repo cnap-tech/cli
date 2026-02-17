@@ -136,6 +136,9 @@ Config is stored at `~/.cnap/config.yaml`. Environment variables take priority:
 | **Regions** | |
 | `cnap regions list` | List regions |
 | `cnap regions create --name <name>` | Create region |
+| **Registry** | |
+| `cnap registry list` | List registry credentials |
+| `cnap registry delete <id> --force` | Delete registry credential |
 | **Shell Completions** | |
 | `cnap completion bash` | Generate bash completions |
 | `cnap completion zsh` | Generate zsh completions |

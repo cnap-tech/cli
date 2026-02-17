@@ -30,6 +30,13 @@ const (
 	RUNNING      KaasInfoStatus = "RUNNING"
 )
 
+// Defines values for RegistryCredentialType.
+const (
+	RegistryCredentialTypeBasic RegistryCredentialType = "basic"
+	RegistryCredentialTypeOauth RegistryCredentialType = "oauth"
+	RegistryCredentialTypeToken RegistryCredentialType = "token"
+)
+
 // Defines values for TemplateRegistryProxyMode.
 const (
 	TemplateRegistryProxyModeAlways      TemplateRegistryProxyMode = "always"
@@ -44,6 +51,13 @@ const (
 	TemplateDetailRegistryProxyModeAuto        TemplateDetailRegistryProxyMode = "auto"
 	TemplateDetailRegistryProxyModeLessThannil TemplateDetailRegistryProxyMode = "<nil>"
 	TemplateDetailRegistryProxyModeNever       TemplateDetailRegistryProxyMode = "never"
+)
+
+// Defines values for PostV1RegistryCredentialsJSONBodyType.
+const (
+	PostV1RegistryCredentialsJSONBodyTypeBasic PostV1RegistryCredentialsJSONBodyType = "basic"
+	PostV1RegistryCredentialsJSONBodyTypeOauth PostV1RegistryCredentialsJSONBodyType = "oauth"
+	PostV1RegistryCredentialsJSONBodyTypeToken PostV1RegistryCredentialsJSONBodyType = "token"
 )
 
 // Defines values for PostV1TemplatesJSONBodyRegistryProxyMode.
@@ -182,6 +196,27 @@ type Region struct {
 	Name        string  `json:"name"`
 	WorkspaceId string  `json:"workspaceId"`
 }
+
+// RegistryCredential defines model for RegistryCredential.
+type RegistryCredential struct {
+	// CreatedAt Unix timestamp (ms)
+	CreatedAt float32 `json:"createdAt"`
+	Id        string  `json:"id"`
+
+	// IsActive Whether the credential is active
+	IsActive bool `json:"isActive"`
+
+	// LastUsedAt Last used timestamp (ms)
+	LastUsedAt  *float32 `json:"lastUsedAt"`
+	Name        string   `json:"name"`
+	RegistryUrl string   `json:"registryUrl"`
+
+	// Type Auth type
+	Type RegistryCredentialType `json:"type"`
+}
+
+// RegistryCredentialType Auth type
+type RegistryCredentialType string
 
 // Template defines model for Template.
 type Template struct {
@@ -354,6 +389,27 @@ type PostV1RegionsJSONBody struct {
 	Name string  `json:"name"`
 }
 
+// PostV1RegistryCredentialsJSONBody defines parameters for PostV1RegistryCredentials.
+type PostV1RegistryCredentialsJSONBody struct {
+	// Credentials Auth credentials (type-dependent)
+	Credentials struct {
+		ClientId     *string `json:"clientId,omitempty"`
+		ClientSecret *string `json:"clientSecret,omitempty"`
+		Password     *string `json:"password,omitempty"`
+		Token        *string `json:"token,omitempty"`
+		TokenUrl     *string `json:"tokenUrl,omitempty"`
+		Username     *string `json:"username,omitempty"`
+	} `json:"credentials"`
+	Name        string `json:"name"`
+	RegistryUrl string `json:"registryUrl"`
+
+	// Type Auth type
+	Type PostV1RegistryCredentialsJSONBodyType `json:"type"`
+}
+
+// PostV1RegistryCredentialsJSONBodyType defines parameters for PostV1RegistryCredentials.
+type PostV1RegistryCredentialsJSONBodyType string
+
 // PostV1TemplatesJSONBody defines parameters for PostV1Templates.
 type PostV1TemplatesJSONBody struct {
 	Name              string                                    `json:"name"`
@@ -470,6 +526,9 @@ type PatchV1ProductsIdJSONRequestBody PatchV1ProductsIdJSONBody
 
 // PostV1RegionsJSONRequestBody defines body for PostV1Regions for application/json ContentType.
 type PostV1RegionsJSONRequestBody PostV1RegionsJSONBody
+
+// PostV1RegistryCredentialsJSONRequestBody defines body for PostV1RegistryCredentials for application/json ContentType.
+type PostV1RegistryCredentialsJSONRequestBody PostV1RegistryCredentialsJSONBody
 
 // PostV1TemplatesJSONRequestBody defines body for PostV1Templates for application/json ContentType.
 type PostV1TemplatesJSONRequestBody PostV1TemplatesJSONBody
@@ -628,6 +687,17 @@ type ClientInterface interface {
 	PostV1RegionsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PostV1Regions(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1RegistryCredentials request
+	GetV1RegistryCredentials(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostV1RegistryCredentialsWithBody request with any body
+	PostV1RegistryCredentialsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1RegistryCredentials(ctx context.Context, body PostV1RegistryCredentialsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteV1RegistryCredentialsId request
+	DeleteV1RegistryCredentialsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Templates request
 	GetV1Templates(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -992,6 +1062,54 @@ func (c *Client) PostV1RegionsWithBody(ctx context.Context, contentType string, 
 
 func (c *Client) PostV1Regions(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostV1RegionsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1RegistryCredentials(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1RegistryCredentialsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1RegistryCredentialsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1RegistryCredentialsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1RegistryCredentials(ctx context.Context, body PostV1RegistryCredentialsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1RegistryCredentialsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteV1RegistryCredentialsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteV1RegistryCredentialsIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1972,6 +2090,107 @@ func NewPostV1RegionsRequestWithBody(server string, contentType string, body io.
 	return req, nil
 }
 
+// NewGetV1RegistryCredentialsRequest generates requests for GetV1RegistryCredentials
+func NewGetV1RegistryCredentialsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/registry/credentials")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostV1RegistryCredentialsRequest calls the generic PostV1RegistryCredentials builder with application/json body
+func NewPostV1RegistryCredentialsRequest(server string, body PostV1RegistryCredentialsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1RegistryCredentialsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1RegistryCredentialsRequestWithBody generates requests for PostV1RegistryCredentials with any type of body
+func NewPostV1RegistryCredentialsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/registry/credentials")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteV1RegistryCredentialsIdRequest generates requests for DeleteV1RegistryCredentialsId
+func NewDeleteV1RegistryCredentialsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/registry/credentials/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetV1TemplatesRequest generates requests for GetV1Templates
 func NewGetV1TemplatesRequest(server string) (*http.Request, error) {
 	var err error
@@ -2434,6 +2653,17 @@ type ClientWithResponsesInterface interface {
 	PostV1RegionsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error)
 
 	PostV1RegionsWithResponse(ctx context.Context, body PostV1RegionsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1RegionsResponse, error)
+
+	// GetV1RegistryCredentialsWithResponse request
+	GetV1RegistryCredentialsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegistryCredentialsResponse, error)
+
+	// PostV1RegistryCredentialsWithBodyWithResponse request with any body
+	PostV1RegistryCredentialsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1RegistryCredentialsResponse, error)
+
+	PostV1RegistryCredentialsWithResponse(ctx context.Context, body PostV1RegistryCredentialsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1RegistryCredentialsResponse, error)
+
+	// DeleteV1RegistryCredentialsIdWithResponse request
+	DeleteV1RegistryCredentialsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1RegistryCredentialsIdResponse, error)
 
 	// GetV1TemplatesWithResponse request
 	GetV1TemplatesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error)
@@ -2987,6 +3217,79 @@ func (r PostV1RegionsResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1RegistryCredentialsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data []RegistryCredential `json:"data"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1RegistryCredentialsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1RegistryCredentialsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostV1RegistryCredentialsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON403      *Error
+	JSON422      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1RegistryCredentialsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1RegistryCredentialsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteV1RegistryCredentialsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteV1RegistryCredentialsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteV1RegistryCredentialsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1TemplatesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3488,6 +3791,41 @@ func (c *ClientWithResponses) PostV1RegionsWithResponse(ctx context.Context, bod
 		return nil, err
 	}
 	return ParsePostV1RegionsResponse(rsp)
+}
+
+// GetV1RegistryCredentialsWithResponse request returning *GetV1RegistryCredentialsResponse
+func (c *ClientWithResponses) GetV1RegistryCredentialsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1RegistryCredentialsResponse, error) {
+	rsp, err := c.GetV1RegistryCredentials(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1RegistryCredentialsResponse(rsp)
+}
+
+// PostV1RegistryCredentialsWithBodyWithResponse request with arbitrary body returning *PostV1RegistryCredentialsResponse
+func (c *ClientWithResponses) PostV1RegistryCredentialsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1RegistryCredentialsResponse, error) {
+	rsp, err := c.PostV1RegistryCredentialsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1RegistryCredentialsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1RegistryCredentialsWithResponse(ctx context.Context, body PostV1RegistryCredentialsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1RegistryCredentialsResponse, error) {
+	rsp, err := c.PostV1RegistryCredentials(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1RegistryCredentialsResponse(rsp)
+}
+
+// DeleteV1RegistryCredentialsIdWithResponse request returning *DeleteV1RegistryCredentialsIdResponse
+func (c *ClientWithResponses) DeleteV1RegistryCredentialsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1RegistryCredentialsIdResponse, error) {
+	rsp, err := c.DeleteV1RegistryCredentialsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteV1RegistryCredentialsIdResponse(rsp)
 }
 
 // GetV1TemplatesWithResponse request returning *GetV1TemplatesResponse
@@ -4463,6 +4801,121 @@ func ParsePostV1RegionsResponse(rsp *http.Response) (*PostV1RegionsResponse, err
 			return nil, err
 		}
 		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1RegistryCredentialsResponse parses an HTTP response from a GetV1RegistryCredentialsWithResponse call
+func ParseGetV1RegistryCredentialsResponse(rsp *http.Response) (*GetV1RegistryCredentialsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1RegistryCredentialsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data []RegistryCredential `json:"data"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostV1RegistryCredentialsResponse parses an HTTP response from a PostV1RegistryCredentialsWithResponse call
+func ParsePostV1RegistryCredentialsResponse(rsp *http.Response) (*PostV1RegistryCredentialsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1RegistryCredentialsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteV1RegistryCredentialsIdResponse parses an HTTP response from a DeleteV1RegistryCredentialsIdWithResponse call
+func ParseDeleteV1RegistryCredentialsIdResponse(rsp *http.Response) (*DeleteV1RegistryCredentialsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteV1RegistryCredentialsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
