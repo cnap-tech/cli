@@ -26,24 +26,28 @@ func newCmdLogin() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Authenticate with CNAP",
-		Long:  "Authenticate using a Personal Access Token. Create one at https://dash.cnap.tech/settings/tokens",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if token == "" {
-				return fmt.Errorf("token is required. Usage: cnap auth login --token <your-token>")
-			}
+		Long: `Authenticate via browser (default) or with a Personal Access Token.
 
+Without flags, opens your browser to authenticate via the device flow.
+With --token, stores the given Personal Access Token directly.
+
+Create tokens at https://dash.cnap.tech/settings/tokens`,
+		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
 
-			cfg.Auth.Token = token
-			if err := cfg.Save(); err != nil {
-				return fmt.Errorf("saving config: %w", err)
+			if token != "" {
+				cfg.Auth.Token = token
+				if err := cfg.Save(); err != nil {
+					return fmt.Errorf("saving config: %w", err)
+				}
+				fmt.Println("Logged in successfully. Token saved to ~/.cnap/config.yaml")
+				return nil
 			}
 
-			fmt.Println("Logged in successfully. Token saved to ~/.cnap/config.yaml")
-			return nil
+			return runDeviceFlow(cmd.Context(), cfg)
 		},
 	}
 
@@ -96,6 +100,7 @@ func newCmdStatus() *cobra.Command {
 			}
 			fmt.Printf("Authenticated with token: %s\n", prefix)
 			fmt.Printf("API URL: %s\n", cfg.BaseURL())
+			fmt.Printf("Auth URL: %s\n", cfg.AuthBaseURL())
 
 			if cfg.ActiveWorkspace != "" {
 				fmt.Printf("Active workspace: %s\n", cfg.ActiveWorkspace)

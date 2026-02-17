@@ -1,7 +1,6 @@
 package workspaces
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/cnap-tech/cli/internal/api"
@@ -42,7 +41,7 @@ func newCmdList() *cobra.Command {
 				params.Cursor = &cursor
 			}
 
-			resp, err := client.GetV1WorkspacesWithResponse(context.Background(), params)
+			resp, err := client.GetV1WorkspacesWithResponse(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("fetching workspaces: %w", err)
 			}

@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -46,7 +45,7 @@ func newCmdList() *cobra.Command {
 				params.Cursor = &cursor
 			}
 
-			resp, err := client.GetV1RegistryCredentialsWithResponse(context.Background(), params)
+			resp, err := client.GetV1RegistryCredentialsWithResponse(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("fetching registry credentials: %w", err)
 			}
@@ -105,7 +104,7 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1RegistryCredentialsIdWithResponse(context.Background(), args[0])
+			resp, err := client.DeleteV1RegistryCredentialsIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("deleting credential: %w", err)
 			}

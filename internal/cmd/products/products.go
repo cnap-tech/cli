@@ -1,7 +1,6 @@
 package products
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -47,7 +46,7 @@ func newCmdList() *cobra.Command {
 				params.Cursor = &cursor
 			}
 
-			resp, err := client.GetV1ProductsWithResponse(context.Background(), params)
+			resp, err := client.GetV1ProductsWithResponse(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("fetching products: %w", err)
 			}
@@ -96,7 +95,7 @@ func newCmdGet() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.GetV1ProductsIdWithResponse(context.Background(), args[0])
+			resp, err := client.GetV1ProductsIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("fetching product: %w", err)
 			}
@@ -143,7 +142,7 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1ProductsIdWithResponse(context.Background(), args[0])
+			resp, err := client.DeleteV1ProductsIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("deleting product: %w", err)
 			}

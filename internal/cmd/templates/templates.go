@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -47,7 +46,7 @@ func newCmdList() *cobra.Command {
 				params.Cursor = &cursor
 			}
 
-			resp, err := client.GetV1TemplatesWithResponse(context.Background(), params)
+			resp, err := client.GetV1TemplatesWithResponse(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("fetching templates: %w", err)
 			}
@@ -100,7 +99,7 @@ func newCmdGet() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.GetV1TemplatesIdWithResponse(context.Background(), args[0])
+			resp, err := client.GetV1TemplatesIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("fetching template: %w", err)
 			}
@@ -166,7 +165,7 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1TemplatesIdWithResponse(context.Background(), args[0])
+			resp, err := client.DeleteV1TemplatesIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("deleting template: %w", err)
 			}

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	authcmd "github.com/cnap-tech/cli/internal/cmd/auth"
@@ -12,6 +13,7 @@ import (
 	templatescmd "github.com/cnap-tech/cli/internal/cmd/templates"
 	workspacescmd "github.com/cnap-tech/cli/internal/cmd/workspaces"
 	"github.com/cnap-tech/cli/internal/cmdutil"
+	"github.com/cnap-tech/cli/internal/useragent"
 	"github.com/spf13/cobra"
 )
 
@@ -20,11 +22,13 @@ var (
 	commit  = "none"
 )
 
-func Execute() error {
-	return rootCmd().Execute()
+func Execute(ctx context.Context) error {
+	return rootCmd().ExecuteContext(ctx)
 }
 
 func rootCmd() *cobra.Command {
+	useragent.SetVersion(version)
+
 	root := &cobra.Command{
 		Use:   "cnap",
 		Short: "CNAP CLI — manage workspaces, clusters, and deployments",

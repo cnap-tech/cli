@@ -2,7 +2,6 @@ package installs
 
 import (
 	"bufio"
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -57,7 +56,7 @@ func newCmdList() *cobra.Command {
 				params.Cursor = &cursor
 			}
 
-			resp, err := client.GetV1InstallsWithResponse(context.Background(), params)
+			resp, err := client.GetV1InstallsWithResponse(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("fetching installs: %w", err)
 			}
@@ -114,7 +113,7 @@ func newCmdGet() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.GetV1InstallsIdWithResponse(context.Background(), args[0])
+			resp, err := client.GetV1InstallsIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("fetching install: %w", err)
 			}
@@ -163,7 +162,7 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1InstallsIdWithResponse(context.Background(), args[0])
+			resp, err := client.DeleteV1InstallsIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("deleting install: %w", err)
 			}
@@ -203,7 +202,7 @@ func newCmdCreate() *cobra.Command {
 				RegionId:  regionID,
 			}
 
-			resp, err := client.PostV1InstallsWithResponse(context.Background(), body)
+			resp, err := client.PostV1InstallsWithResponse(cmd.Context(), body)
 			if err != nil {
 				return fmt.Errorf("creating install: %w", err)
 			}
@@ -255,7 +254,7 @@ func newCmdUpdateValues() *cobra.Command {
 				},
 			}
 
-			resp, err := client.PatchV1InstallsIdValuesWithResponse(context.Background(), args[0], body)
+			resp, err := client.PatchV1InstallsIdValuesWithResponse(cmd.Context(), args[0], body)
 			if err != nil {
 				return fmt.Errorf("updating install values: %w", err)
 			}
@@ -307,7 +306,7 @@ func newCmdUpdateOverrides() *cobra.Command {
 				},
 			}
 
-			resp, err := client.PatchV1InstallsIdOverridesWithResponse(context.Background(), args[0], body)
+			resp, err := client.PatchV1InstallsIdOverridesWithResponse(cmd.Context(), args[0], body)
 			if err != nil {
 				return fmt.Errorf("updating install overrides: %w", err)
 			}
@@ -363,7 +362,7 @@ func newCmdPods() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.GetV1InstallsIdPodsWithResponse(context.Background(), args[0])
+			resp, err := client.GetV1InstallsIdPodsWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("fetching pods: %w", err)
 			}
@@ -425,7 +424,7 @@ func newCmdLogs() *cobra.Command {
 				params.SinceSeconds = &sinceSeconds
 			}
 
-			ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+			ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt)
 			defer cancel()
 
 			// Use raw client to get streaming response

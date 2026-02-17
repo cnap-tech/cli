@@ -8,6 +8,7 @@ import (
 	"github.com/cnap-tech/cli/internal/api"
 	"github.com/cnap-tech/cli/internal/config"
 	"github.com/cnap-tech/cli/internal/output"
+	"github.com/cnap-tech/cli/internal/useragent"
 )
 
 // OutputFormat holds the CLI-level --output flag value.
@@ -38,6 +39,7 @@ func NewClient() (*api.ClientWithResponses, *config.Config, error) {
 	client, err := api.NewClientWithResponses(baseURL, api.WithRequestEditorFn(
 		func(_ context.Context, req *http.Request) error {
 			req.Header.Set("Authorization", "Bearer "+token)
+			req.Header.Set("User-Agent", useragent.String())
 			if cfg.ActiveWorkspace != "" {
 				req.Header.Set("X-Workspace-Id", cfg.ActiveWorkspace)
 			}

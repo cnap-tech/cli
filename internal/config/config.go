@@ -9,13 +9,15 @@ import (
 )
 
 const (
-	DefaultAPIURL = "https://api.cnap.tech"
-	configDir     = ".cnap"
-	configFile    = "config.yaml"
+	DefaultAPIURL  = "https://api.cnap.tech"
+	DefaultAuthURL = "https://dash.cnap.tech"
+	configDir      = ".cnap"
+	configFile     = "config.yaml"
 )
 
 type Config struct {
 	APIURL          string `yaml:"api_url"`
+	AuthURL         string `yaml:"auth_url,omitempty"`
 	ActiveWorkspace string `yaml:"active_workspace,omitempty"`
 	Auth            Auth   `yaml:"auth"`
 	Output          Output `yaml:"output"`
@@ -107,4 +109,16 @@ func (c *Config) BaseURL() string {
 		return u
 	}
 	return c.APIURL
+}
+
+// AuthBaseURL returns the auth/dashboard base URL from env var or config file.
+// Env var CNAP_AUTH_URL takes priority. Used for device flow auth endpoints.
+func (c *Config) AuthBaseURL() string {
+	if u := os.Getenv("CNAP_AUTH_URL"); u != "" {
+		return u
+	}
+	if c.AuthURL != "" {
+		return c.AuthURL
+	}
+	return DefaultAuthURL
 }

@@ -1,7 +1,6 @@
 package clusters
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -48,7 +47,7 @@ func newCmdList() *cobra.Command {
 				params.Cursor = &cursor
 			}
 
-			resp, err := client.GetV1ClustersWithResponse(context.Background(), params)
+			resp, err := client.GetV1ClustersWithResponse(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("fetching clusters: %w", err)
 			}
@@ -103,7 +102,7 @@ func newCmdGet() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.GetV1ClustersIdWithResponse(context.Background(), args[0])
+			resp, err := client.GetV1ClustersIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("fetching cluster: %w", err)
 			}
@@ -168,7 +167,7 @@ func newCmdUpdate() *cobra.Command {
 				body.RegionId = &regionID
 			}
 
-			resp, err := client.PatchV1ClustersIdWithResponse(context.Background(), args[0], body)
+			resp, err := client.PatchV1ClustersIdWithResponse(cmd.Context(), args[0], body)
 			if err != nil {
 				return fmt.Errorf("updating cluster: %w", err)
 			}
@@ -204,7 +203,7 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1ClustersIdWithResponse(context.Background(), args[0])
+			resp, err := client.DeleteV1ClustersIdWithResponse(cmd.Context(), args[0])
 			if err != nil {
 				return fmt.Errorf("deleting cluster: %w", err)
 			}

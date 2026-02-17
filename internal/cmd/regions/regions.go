@@ -1,7 +1,6 @@
 package regions
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -46,7 +45,7 @@ func newCmdList() *cobra.Command {
 				params.Cursor = &cursor
 			}
 
-			resp, err := client.GetV1RegionsWithResponse(context.Background(), params)
+			resp, err := client.GetV1RegionsWithResponse(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("fetching regions: %w", err)
 			}
@@ -115,7 +114,7 @@ func newCmdCreate() *cobra.Command {
 				body.Icon = &icon
 			}
 
-			resp, err := client.PostV1RegionsWithResponse(context.Background(), body)
+			resp, err := client.PostV1RegionsWithResponse(cmd.Context(), body)
 			if err != nil {
 				return fmt.Errorf("creating region: %w", err)
 			}
