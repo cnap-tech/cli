@@ -13,6 +13,7 @@ import (
 	templatescmd "github.com/cnap-tech/cli/internal/cmd/templates"
 	workspacescmd "github.com/cnap-tech/cli/internal/cmd/workspaces"
 	"github.com/cnap-tech/cli/internal/cmdutil"
+	"github.com/cnap-tech/cli/internal/debug"
 	"github.com/cnap-tech/cli/internal/useragent"
 	"github.com/spf13/cobra"
 )
@@ -29,6 +30,8 @@ func Execute(ctx context.Context) error {
 func rootCmd() *cobra.Command {
 	useragent.SetVersion(version)
 
+	var debugFlag bool
+
 	root := &cobra.Command{
 		Use:   "cnap",
 		Short: "CNAP CLI — manage workspaces, clusters, and deployments",
@@ -39,8 +42,15 @@ Authenticate with a Personal Access Token or via browser login.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Version:       fmt.Sprintf("%s (%s)", version, commit),
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			debug.Init(debugFlag)
+			if debug.Enabled {
+				debug.Install()
+			}
+		},
 	}
 
+	root.PersistentFlags().BoolVar(&debugFlag, "debug", false, "Enable debug logging (or set CNAP_DEBUG=1)")
 	root.PersistentFlags().StringVarP(&cmdutil.OutputFormat, "output", "o", "", "Output format: table, json, quiet")
 	root.PersistentFlags().StringVar(&cmdutil.APIURL, "api-url", "", "API base URL (overrides config)")
 

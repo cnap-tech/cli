@@ -3,10 +3,12 @@ package cmdutil
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/cnap-tech/cli/internal/api"
 	"github.com/cnap-tech/cli/internal/config"
+	"github.com/cnap-tech/cli/internal/debug"
 	"github.com/cnap-tech/cli/internal/output"
 	"github.com/cnap-tech/cli/internal/useragent"
 )
@@ -35,8 +37,9 @@ func NewClient() (*api.ClientWithResponses, *config.Config, error) {
 	}
 
 	baseURL := cfg.BaseURL()
+	slog.Debug("creating API client", "base_url", baseURL, "workspace", cfg.ActiveWorkspace, "user_agent", useragent.String())
 
-	client, err := api.NewClientWithResponses(baseURL, api.WithRequestEditorFn(
+	client, err := api.NewClientWithResponses(baseURL, api.WithHTTPClient(debug.Client()), api.WithRequestEditorFn(
 		func(_ context.Context, req *http.Request) error {
 			req.Header.Set("Authorization", "Bearer "+token)
 			req.Header.Set("User-Agent", useragent.String())

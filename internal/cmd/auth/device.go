@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os/exec"
 	"runtime"
@@ -70,6 +71,7 @@ type createdTokenResponse struct {
 
 func runDeviceFlow(ctx context.Context, cfg *config.Config) error {
 	authURL := cfg.AuthBaseURL()
+	slog.Debug("starting device flow", "auth_url", authURL, "api_url", cfg.BaseURL())
 
 	// Step 1: Request device code
 	code, err := requestDeviceCode(ctx, authURL)
@@ -101,6 +103,7 @@ func runDeviceFlow(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 
+	slog.Debug("device flow authorized, exchanging tokens")
 	fmt.Println("\nAuthorized! Creating API token...")
 
 	// Step 4: Exchange session token for a JWT (the public API middleware verifies JWTs, not session tokens)
