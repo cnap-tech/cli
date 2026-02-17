@@ -1,14 +1,14 @@
 // Device authorization flow (RFC 8628) for browser-based CLI authentication.
 //
 // Flow:
-//   1. POST /api/auth/device/code          → device_code + user_code
-//   2. Open browser to /device?user_code=X → user approves
-//   3. POST /api/auth/device/token (poll)  → session token (access_token)
-//   4. GET  /api/auth/convex/token         → Convex JWT (Bearer session token)
-//   5. POST /v1/user/tokens                → PAT (Bearer Convex JWT)
-//   6. Store PAT in ~/.cnap/config.yaml    → all subsequent CLI requests use PAT
+//  1. POST /api/auth/device/code           - device_code + user_code
+//  2. Open browser to /device?user_code=X  - user approves
+//  3. POST /api/auth/device/token (poll)   - session token (access_token)
+//  4. GET  /api/auth/convex/token          - Convex JWT (Bearer session token)
+//  5. POST /v1/user/tokens                 - PAT (Bearer Convex JWT)
+//  6. Store PAT in ~/.cnap/config.yaml     - all subsequent CLI requests use PAT
 //
-// Why exchange session → Convex JWT → PAT?
+// Why exchange session for Convex JWT then PAT?
 //   - The device flow returns an opaque session token (not a JWT)
 //   - The public API middleware only accepts JWTs or PATs, not session tokens
 //   - BetterAuth's convex plugin provides /api/auth/convex/token which converts
@@ -143,7 +143,7 @@ func requestDeviceCode(ctx context.Context, authURL string) (*deviceCodeResponse
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != 200 {
 		data, _ := io.ReadAll(resp.Body)
@@ -188,7 +188,7 @@ func pollForToken(ctx context.Context, authURL, deviceCode string, interval time
 		}
 
 		data, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		resp.Body.Close() //nolint:errcheck
 
 		if resp.StatusCode == 200 {
 			var tokenResp deviceTokenResponse
@@ -235,7 +235,7 @@ func exchangeSessionForJWT(ctx context.Context, authURL, sessionToken string) (s
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != 200 {
 		data, _ := io.ReadAll(resp.Body)
@@ -271,7 +271,7 @@ func createPATFromJWT(ctx context.Context, cfg *config.Config, jwtToken string) 
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != 201 {
 		data, _ := io.ReadAll(resp.Body)
