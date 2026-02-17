@@ -18,7 +18,10 @@ go install github.com/cnap-tech/cli/cmd/cnap@latest
 ## Quick Start
 
 ```bash
-# Authenticate with a Personal Access Token
+# Authenticate via browser (opens device flow)
+cnap auth login
+
+# Or authenticate with a Personal Access Token
 cnap auth login --token cnap_pat_...
 
 # List and select a workspace
@@ -92,6 +95,8 @@ Config is stored at `~/.cnap/config.yaml`. Environment variables take priority:
 |---------|-------------|
 | `CNAP_API_TOKEN` | API token (overrides config) |
 | `CNAP_API_URL` | API base URL (overrides config) |
+| `CNAP_AUTH_URL` | Auth base URL (overrides config) |
+| `CNAP_DEBUG` | Enable debug logging (set to any value) |
 
 ## Global Flags
 
@@ -99,13 +104,15 @@ Config is stored at `~/.cnap/config.yaml`. Environment variables take priority:
 |------|-------------|
 | `-o, --output` | Output format: `table`, `json`, `quiet` |
 | `--api-url` | API base URL override |
+| `--debug` | Enable debug logging (HTTP traces to stderr) |
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | **Auth** | |
-| `cnap auth login --token <token>` | Authenticate |
+| `cnap auth login` | Authenticate via browser (device flow) |
+| `cnap auth login --token <token>` | Authenticate with a PAT |
 | `cnap auth logout` | Remove credentials |
 | `cnap auth status` | Show auth status |
 | **Workspaces** | |
