@@ -116,10 +116,10 @@ func newCmdGet() *cobra.Command {
 
 			format := cmdutil.GetOutputFormat(cfg)
 			if format == output.FormatJSON {
-				return output.PrintJSON(resp.JSON200.Data)
+				return output.PrintJSON(resp.JSON200)
 			}
 
-			c := resp.JSON200.Data
+			c := resp.JSON200
 			clusterType := "imported"
 			status := "-"
 			if c.Kaas != nil {
@@ -179,7 +179,7 @@ func newCmdUpdate() *cobra.Command {
 				return fmt.Errorf("unexpected response: %s", resp.Status())
 			}
 
-			fmt.Printf("Cluster %s updated.\n", resp.JSON200.Data.Name)
+			fmt.Printf("Cluster %s updated.\n", resp.JSON200.Name)
 			return nil
 		},
 	}

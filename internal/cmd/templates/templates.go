@@ -109,10 +109,10 @@ func newCmdGet() *cobra.Command {
 
 			format := cmdutil.GetOutputFormat(cfg)
 			if format == output.FormatJSON {
-				return output.PrintJSON(resp.JSON200.Data)
+				return output.PrintJSON(resp.JSON200)
 			}
 
-			t := resp.JSON200.Data
+			t := resp.JSON200
 			proxyMode := "-"
 			if t.RegistryProxyMode != nil {
 				proxyMode = string(*t.RegistryProxyMode)

@@ -109,7 +109,7 @@ In non-interactive environments (CI, pipes), the workspace ID argument is requir
 				if resp.JSON200 == nil {
 					return fmt.Errorf("workspace %q not found", workspaceID)
 				}
-				fmt.Printf("Workspace: %s\n", resp.JSON200.Data.Name)
+				fmt.Printf("Workspace: %s\n", resp.JSON200.Name)
 			} else {
 				// Fetch workspaces for interactive selection
 				limit := 100

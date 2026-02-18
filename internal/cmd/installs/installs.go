@@ -133,10 +133,10 @@ func newCmdGet() *cobra.Command {
 
 			format := cmdutil.GetOutputFormat(cfg)
 			if format == output.FormatJSON {
-				return output.PrintJSON(resp.JSON200.Data)
+				return output.PrintJSON(resp.JSON200)
 			}
 
-			i := resp.JSON200.Data
+			i := resp.JSON200
 
 			output.PrintTable(
 				[]string{"FIELD", "VALUE"},
@@ -212,7 +212,7 @@ func newCmdCreate() *cobra.Command {
 				RegionId:  regionID,
 			}
 
-			resp, err := client.PostV1InstallsWithResponse(cmd.Context(), body)
+			resp, err := client.PostV1InstallsWithResponse(cmd.Context(), nil, body)
 			if err != nil {
 				return fmt.Errorf("creating install: %w", err)
 			}
@@ -254,7 +254,7 @@ func newCmdUpdateValues() *cobra.Command {
 
 			body := api.PatchV1InstallsIdValuesJSONRequestBody{
 				Updates: []struct {
-					TemplateHelmSourceId string                  `json:"templateHelmSourceId"`
+					TemplateHelmSourceId string                  `json:"template_helm_source_id"`
 					Values               map[string]*interface{} `json:"values"`
 				}{
 					{
@@ -306,7 +306,7 @@ func newCmdUpdateOverrides() *cobra.Command {
 
 			body := api.PatchV1InstallsIdOverridesJSONRequestBody{
 				Updates: []struct {
-					TemplateHelmSourceId string                  `json:"templateHelmSourceId"`
+					TemplateHelmSourceId string                  `json:"template_helm_source_id"`
 					Values               map[string]*interface{} `json:"values"`
 				}{
 					{

@@ -124,10 +124,10 @@ func newCmdCreate() *cobra.Command {
 
 			format := cmdutil.GetOutputFormat(cfg)
 			if format == output.FormatJSON {
-				return output.PrintJSON(resp.JSON201.Data)
+				return output.PrintJSON(resp.JSON201)
 			}
 
-			fmt.Printf("Region %s created (%s).\n", resp.JSON201.Data.Name, resp.JSON201.Data.Id)
+			fmt.Printf("Region %s created (%s).\n", resp.JSON201.Name, resp.JSON201.Id)
 			return nil
 		},
 	}

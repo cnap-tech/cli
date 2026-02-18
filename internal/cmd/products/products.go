@@ -105,10 +105,10 @@ func newCmdGet() *cobra.Command {
 
 			format := cmdutil.GetOutputFormat(cfg)
 			if format == output.FormatJSON {
-				return output.PrintJSON(resp.JSON200.Data)
+				return output.PrintJSON(resp.JSON200)
 			}
 
-			p := resp.JSON200.Data
+			p := resp.JSON200
 
 			output.PrintTable(
 				[]string{"FIELD", "VALUE"},

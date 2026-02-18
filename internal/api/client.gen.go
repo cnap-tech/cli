@@ -78,15 +78,15 @@ const (
 
 // ApiToken defines model for ApiToken.
 type ApiToken struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt float32 `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
 
-	// ExpiresAt Unix timestamp (ms), null if never
-	ExpiresAt *float32 `json:"expiresAt"`
+	// ExpiresAt Unix timestamp (seconds), null if never
+	ExpiresAt *float32 `json:"expires_at"`
 	Id        string   `json:"id"`
 
-	// LastUsedAt Unix timestamp (ms) of last use
-	LastUsedAt *float32 `json:"lastUsedAt"`
+	// LastUsedAt Unix timestamp (seconds) of last use
+	LastUsedAt *float32 `json:"last_used_at"`
 	Name       string   `json:"name"`
 	Prefix     string   `json:"prefix"`
 }
@@ -99,15 +99,15 @@ type ApiTokenList struct {
 
 // Cluster defines model for Cluster.
 type Cluster struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt float32 `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
 	Id        string  `json:"id"`
 
 	// Kaas Present if cluster is KaaS-managed
 	Kaas        *KaasInfo `json:"kaas"`
 	Name        string    `json:"name"`
-	RegionId    string    `json:"regionId"`
-	WorkspaceId string    `json:"workspaceId"`
+	RegionId    string    `json:"region_id"`
+	WorkspaceId string    `json:"workspace_id"`
 }
 
 // ClusterList defines model for ClusterList.
@@ -128,10 +128,13 @@ type CreatedToken struct {
 // Error defines model for Error.
 type Error struct {
 	Error struct {
-		Code       string      `json:"code"`
-		Details    interface{} `json:"details"`
-		Message    string      `json:"message"`
-		Suggestion *string     `json:"suggestion,omitempty"`
+		Code    string      `json:"code"`
+		Details interface{} `json:"details"`
+		Message string      `json:"message"`
+
+		// Param The request field that caused the error
+		Param      *string `json:"param,omitempty"`
+		Suggestion *string `json:"suggestion,omitempty"`
 	} `json:"error"`
 }
 
@@ -147,25 +150,25 @@ type HelmSource struct {
 type HelmSourceChart struct {
 	Chart          *string `json:"chart,omitempty"`
 	Path           *string `json:"path,omitempty"`
-	RepoUrl        string  `json:"repoUrl"`
-	TargetRevision string  `json:"targetRevision"`
+	RepoUrl        string  `json:"repo_url"`
+	TargetRevision string  `json:"target_revision"`
 }
 
 // Install defines model for Install.
 type Install struct {
-	ClusterId string `json:"clusterId"`
+	ClusterId string `json:"cluster_id"`
 
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt float32 `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
 	Id        string  `json:"id"`
 	Name      *string `json:"name"`
 
 	// ProductId Set for product-based installs
-	ProductId *string `json:"productId"`
+	ProductId *string `json:"product_id"`
 
 	// TemplateId Template driving this install
-	TemplateId  *string `json:"templateId"`
-	WorkspaceId string  `json:"workspaceId"`
+	TemplateId  *string `json:"template_id"`
+	WorkspaceId string  `json:"workspace_id"`
 }
 
 // InstallList defines model for InstallList.
@@ -177,7 +180,7 @@ type InstallList struct {
 // KaasInfo Present if cluster is KaaS-managed
 type KaasInfo struct {
 	Status        KaasInfoStatus `json:"status"`
-	StatusMessage *string        `json:"statusMessage"`
+	StatusMessage *string        `json:"status_message"`
 	Version       string         `json:"version"`
 }
 
@@ -188,7 +191,7 @@ type KaasInfoStatus string
 type Pagination struct {
 	// Cursor Cursor for next page, null if no more
 	Cursor  *string `json:"cursor"`
-	HasMore bool    `json:"hasMore"`
+	HasMore bool    `json:"has_more"`
 }
 
 // Pod defines model for Pod.
@@ -199,17 +202,17 @@ type Pod struct {
 
 // Product defines model for Product.
 type Product struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt float32 `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
 	Id        string  `json:"id"`
 	Name      string  `json:"name"`
 	Settings  *struct {
-		CustomDescription *string `json:"customDescription,omitempty"`
-		CustomImage       *string `json:"customImage,omitempty"`
-		ShowSources       *bool   `json:"showSources,omitempty"`
+		CustomDescription *string `json:"custom_description,omitempty"`
+		CustomImage       *string `json:"custom_image,omitempty"`
+		ShowSources       *bool   `json:"show_sources,omitempty"`
 	} `json:"settings"`
-	TemplateId  string `json:"templateId"`
-	WorkspaceId string `json:"workspaceId"`
+	TemplateId  string `json:"template_id"`
+	WorkspaceId string `json:"workspace_id"`
 }
 
 // ProductList defines model for ProductList.
@@ -220,14 +223,14 @@ type ProductList struct {
 
 // Region defines model for Region.
 type Region struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt float32 `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
 
 	// Icon Icon URL
 	Icon        *string `json:"icon"`
 	Id          string  `json:"id"`
 	Name        string  `json:"name"`
-	WorkspaceId string  `json:"workspaceId"`
+	WorkspaceId string  `json:"workspace_id"`
 }
 
 // RegionList defines model for RegionList.
@@ -238,17 +241,17 @@ type RegionList struct {
 
 // RegistryCredential defines model for RegistryCredential.
 type RegistryCredential struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt float32 `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
 	Id        string  `json:"id"`
 
 	// IsActive Whether the credential is active
-	IsActive bool `json:"isActive"`
+	IsActive bool `json:"is_active"`
 
-	// LastUsedAt Last used timestamp (ms)
-	LastUsedAt  *float32 `json:"lastUsedAt"`
+	// LastUsedAt Unix timestamp (seconds)
+	LastUsedAt  *float32 `json:"last_used_at"`
 	Name        string   `json:"name"`
-	RegistryUrl string   `json:"registryUrl"`
+	RegistryUrl string   `json:"registry_url"`
 
 	// Type Auth type
 	Type RegistryCredentialType `json:"type"`
@@ -265,12 +268,12 @@ type RegistryCredentialList struct {
 
 // Template defines model for Template.
 type Template struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt         float32                    `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt         float32                    `json:"created_at"`
 	Id                string                     `json:"id"`
 	Name              string                     `json:"name"`
-	RegistryProxyMode *TemplateRegistryProxyMode `json:"registryProxyMode"`
-	WorkspaceId       string                     `json:"workspaceId"`
+	RegistryProxyMode *TemplateRegistryProxyMode `json:"registry_proxy_mode"`
+	WorkspaceId       string                     `json:"workspace_id"`
 }
 
 // TemplateRegistryProxyMode defines model for Template.RegistryProxyMode.
@@ -278,13 +281,13 @@ type TemplateRegistryProxyMode string
 
 // TemplateDetail defines model for TemplateDetail.
 type TemplateDetail struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt         float32                          `json:"createdAt"`
-	HelmSources       []HelmSource                     `json:"helmSources"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt         float32                          `json:"created_at"`
+	HelmSources       []HelmSource                     `json:"helm_sources"`
 	Id                string                           `json:"id"`
 	Name              string                           `json:"name"`
-	RegistryProxyMode *TemplateDetailRegistryProxyMode `json:"registryProxyMode"`
-	WorkspaceId       string                           `json:"workspaceId"`
+	RegistryProxyMode *TemplateDetailRegistryProxyMode `json:"registry_proxy_mode"`
+	WorkspaceId       string                           `json:"workspace_id"`
 }
 
 // TemplateDetailRegistryProxyMode defines model for TemplateDetail.RegistryProxyMode.
@@ -298,8 +301,8 @@ type TemplateList struct {
 
 // Workspace defines model for Workspace.
 type Workspace struct {
-	// CreatedAt Unix timestamp (ms)
-	CreatedAt float32 `json:"createdAt"`
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
 	Icon      *string `json:"icon"`
 	Id        string  `json:"id"`
 	Name      string  `json:"name"`
@@ -325,7 +328,7 @@ type PatchV1ClustersIdJSONBody struct {
 	Name *string `json:"name,omitempty"`
 
 	// RegionId Region ID
-	RegionId *string `json:"regionId,omitempty"`
+	RegionId *string `json:"region_id,omitempty"`
 }
 
 // GetV1InstallsParams defines parameters for GetV1Installs.
@@ -342,34 +345,46 @@ type PostV1InstallsJSONBody struct {
 	// Overrides Initial value overrides per helm source
 	Overrides *[]struct {
 		// TemplateHelmSourceId Helm source ID to override
-		TemplateHelmSourceId string `json:"templateHelmSourceId"`
+		TemplateHelmSourceId string `json:"template_helm_source_id"`
 
 		// Values Helm values
 		Values map[string]*interface{} `json:"values"`
 	} `json:"overrides,omitempty"`
 
 	// ProductId Product ID
-	ProductId string `json:"productId"`
+	ProductId string `json:"product_id"`
 
 	// RegionId Region ID
-	RegionId string `json:"regionId"`
+	RegionId string `json:"region_id"`
+}
+
+// PostV1InstallsParams defines parameters for PostV1Installs.
+type PostV1InstallsParams struct {
+	// IdempotencyKey Unique key to prevent duplicate operations. If the same key is sent again, the existing workflow is returned instead of creating a new one.
+	IdempotencyKey *string `json:"idempotency-key,omitempty"`
 }
 
 // PostV1InstallsStandaloneJSONBody defines parameters for PostV1InstallsStandalone.
 type PostV1InstallsStandaloneJSONBody struct {
 	// ClusterIds Cluster IDs to deploy to
-	ClusterIds  []string `json:"clusterIds"`
+	ClusterIds  []string `json:"cluster_ids"`
 	HelmSources []struct {
 		Chart struct {
 			Chart          *string `json:"chart,omitempty"`
 			Path           *string `json:"path,omitempty"`
-			RepoUrl        string  `json:"repoUrl"`
-			TargetRevision string  `json:"targetRevision"`
+			RepoUrl        string  `json:"repo_url"`
+			TargetRevision string  `json:"target_revision"`
 		} `json:"chart"`
 		Metadata *map[string]*interface{} `json:"metadata,omitempty"`
 		Values   *map[string]*interface{} `json:"values,omitempty"`
-	} `json:"helmSources"`
+	} `json:"helm_sources"`
 	Name string `json:"name"`
+}
+
+// PostV1InstallsStandaloneParams defines parameters for PostV1InstallsStandalone.
+type PostV1InstallsStandaloneParams struct {
+	// IdempotencyKey Unique key to prevent duplicate operations. If the same key is sent again, the existing workflow is returned instead of creating a new one.
+	IdempotencyKey *string `json:"idempotency-key,omitempty"`
 }
 
 // GetV1InstallsIdLogsParams defines parameters for GetV1InstallsIdLogs.
@@ -387,14 +402,14 @@ type GetV1InstallsIdLogsParams struct {
 	Tail *int `form:"tail,omitempty" json:"tail,omitempty"`
 
 	// SinceSeconds Only return logs newer than this many seconds
-	SinceSeconds *int `form:"sinceSeconds,omitempty" json:"sinceSeconds,omitempty"`
+	SinceSeconds *int `form:"since_seconds,omitempty" json:"since_seconds,omitempty"`
 }
 
 // PatchV1InstallsIdOverridesJSONBody defines parameters for PatchV1InstallsIdOverrides.
 type PatchV1InstallsIdOverridesJSONBody struct {
 	Updates []struct {
 		// TemplateHelmSourceId Helm source ID
-		TemplateHelmSourceId string `json:"templateHelmSourceId"`
+		TemplateHelmSourceId string `json:"template_helm_source_id"`
 
 		// Values Override values
 		Values map[string]*interface{} `json:"values"`
@@ -405,7 +420,7 @@ type PatchV1InstallsIdOverridesJSONBody struct {
 type PatchV1InstallsIdValuesJSONBody struct {
 	Updates []struct {
 		// TemplateHelmSourceId Helm source ID
-		TemplateHelmSourceId string `json:"templateHelmSourceId"`
+		TemplateHelmSourceId string `json:"template_helm_source_id"`
 
 		// Values Helm values
 		Values map[string]*interface{} `json:"values"`
@@ -424,46 +439,46 @@ type GetV1ProductsParams struct {
 // PostV1ProductsJSONBody defines parameters for PostV1Products.
 type PostV1ProductsJSONBody struct {
 	// ClusterIds Cluster IDs to deploy to
-	ClusterIds []string `json:"clusterIds"`
+	ClusterIds []string `json:"cluster_ids"`
 	Name       string   `json:"name"`
 	Settings   *struct {
-		CustomDescription *string `json:"customDescription,omitempty"`
-		CustomImage       *string `json:"customImage,omitempty"`
-		ShowSources       *bool   `json:"showSources,omitempty"`
+		CustomDescription *string `json:"custom_description,omitempty"`
+		CustomImage       *string `json:"custom_image,omitempty"`
+		ShowSources       *bool   `json:"show_sources,omitempty"`
 	} `json:"settings,omitempty"`
 	Sources []struct {
 		Chart struct {
 			Chart          *string `json:"chart,omitempty"`
 			Path           *string `json:"path,omitempty"`
-			RepoUrl        string  `json:"repoUrl"`
-			TargetRevision string  `json:"targetRevision"`
+			RepoUrl        string  `json:"repo_url"`
+			TargetRevision string  `json:"target_revision"`
 		} `json:"chart"`
 		Metadata *map[string]*interface{} `json:"metadata,omitempty"`
 		Values   *map[string]*interface{} `json:"values,omitempty"`
 	} `json:"sources"`
-	StripePriceIds *[]string `json:"stripePriceIds,omitempty"`
+	StripePriceIds *[]string `json:"stripe_price_ids,omitempty"`
 }
 
 // PatchV1ProductsIdJSONBody defines parameters for PatchV1ProductsId.
 type PatchV1ProductsIdJSONBody struct {
-	ClusterIds []string `json:"clusterIds"`
+	ClusterIds []string `json:"cluster_ids"`
 	Name       string   `json:"name"`
 	Settings   *struct {
-		CustomDescription *string `json:"customDescription,omitempty"`
-		CustomImage       *string `json:"customImage,omitempty"`
-		ShowSources       *bool   `json:"showSources,omitempty"`
+		CustomDescription *string `json:"custom_description,omitempty"`
+		CustomImage       *string `json:"custom_image,omitempty"`
+		ShowSources       *bool   `json:"show_sources,omitempty"`
 	} `json:"settings,omitempty"`
 	Sources []struct {
 		Chart struct {
 			Chart          *string `json:"chart,omitempty"`
 			Path           *string `json:"path,omitempty"`
-			RepoUrl        string  `json:"repoUrl"`
-			TargetRevision string  `json:"targetRevision"`
+			RepoUrl        string  `json:"repo_url"`
+			TargetRevision string  `json:"target_revision"`
 		} `json:"chart"`
 		Metadata *map[string]*interface{} `json:"metadata,omitempty"`
 		Values   *map[string]*interface{} `json:"values,omitempty"`
 	} `json:"sources"`
-	StripePriceIds *[]string `json:"stripePriceIds,omitempty"`
+	StripePriceIds *[]string `json:"stripe_price_ids,omitempty"`
 }
 
 // GetV1RegionsParams defines parameters for GetV1Regions.
@@ -495,15 +510,15 @@ type GetV1RegistryCredentialsParams struct {
 type PostV1RegistryCredentialsJSONBody struct {
 	// Credentials Auth credentials (type-dependent)
 	Credentials struct {
-		ClientId     *string `json:"clientId,omitempty"`
-		ClientSecret *string `json:"clientSecret,omitempty"`
+		ClientId     *string `json:"client_id,omitempty"`
+		ClientSecret *string `json:"client_secret,omitempty"`
 		Password     *string `json:"password,omitempty"`
 		Token        *string `json:"token,omitempty"`
-		TokenUrl     *string `json:"tokenUrl,omitempty"`
+		TokenUrl     *string `json:"token_url,omitempty"`
 		Username     *string `json:"username,omitempty"`
 	} `json:"credentials"`
 	Name        string `json:"name"`
-	RegistryUrl string `json:"registryUrl"`
+	RegistryUrl string `json:"registry_url"`
 
 	// Type Auth type
 	Type PostV1RegistryCredentialsJSONBodyType `json:"type"`
@@ -524,33 +539,33 @@ type GetV1TemplatesParams struct {
 // PostV1TemplatesJSONBody defines parameters for PostV1Templates.
 type PostV1TemplatesJSONBody struct {
 	Name              string                                    `json:"name"`
-	RegistryProxyMode *PostV1TemplatesJSONBodyRegistryProxyMode `json:"registryProxyMode,omitempty"`
+	RegistryProxyMode *PostV1TemplatesJSONBodyRegistryProxyMode `json:"registry_proxy_mode,omitempty"`
 	Sources           []struct {
 		Chart struct {
 			Chart          *string `json:"chart,omitempty"`
 			Path           *string `json:"path,omitempty"`
-			RepoUrl        string  `json:"repoUrl"`
-			TargetRevision string  `json:"targetRevision"`
+			RepoUrl        string  `json:"repo_url"`
+			TargetRevision string  `json:"target_revision"`
 		} `json:"chart"`
 		Metadata *struct {
-			ArtifactHubHelmPackage *map[string]*interface{} `json:"artifactHubHelmPackage,omitempty"`
-			AutoDeploy             *bool                    `json:"autoDeploy,omitempty"`
+			ArtifactHubHelmPackage *map[string]*interface{} `json:"artifact_hub_helm_package,omitempty"`
+			AutoDeploy             *bool                    `json:"auto_deploy,omitempty"`
 			Image                  *struct {
 				Github *struct {
 					Repository *struct {
-						FullName string  `json:"fullName"`
-						HtmlUrl  string  `json:"htmlUrl"`
+						FullName string  `json:"full_name"`
+						HtmlUrl  string  `json:"html_url"`
 						Id       float32 `json:"id"`
 						Name     string  `json:"name"`
 						Owner    struct {
-							AvatarUrl string  `json:"avatarUrl"`
-							HtmlUrl   string  `json:"htmlUrl"`
+							AvatarUrl string  `json:"avatar_url"`
+							HtmlUrl   string  `json:"html_url"`
 							Id        float32 `json:"id"`
 							Login     string  `json:"login"`
 							Type      string  `json:"type"`
 						} `json:"owner"`
 					} `json:"repository,omitempty"`
-					WorkflowRunId *string `json:"workflowRunId,omitempty"`
+					WorkflowRunId *string `json:"workflow_run_id,omitempty"`
 				} `json:"github,omitempty"`
 				Tag string `json:"tag"`
 				Url string `json:"url"`
@@ -566,33 +581,33 @@ type PostV1TemplatesJSONBodyRegistryProxyMode string
 // PatchV1TemplatesIdJSONBody defines parameters for PatchV1TemplatesId.
 type PatchV1TemplatesIdJSONBody struct {
 	Name              *string                                      `json:"name,omitempty"`
-	RegistryProxyMode *PatchV1TemplatesIdJSONBodyRegistryProxyMode `json:"registryProxyMode,omitempty"`
+	RegistryProxyMode *PatchV1TemplatesIdJSONBodyRegistryProxyMode `json:"registry_proxy_mode,omitempty"`
 	Sources           *[]struct {
 		Chart struct {
 			Chart          *string `json:"chart,omitempty"`
 			Path           *string `json:"path,omitempty"`
-			RepoUrl        string  `json:"repoUrl"`
-			TargetRevision string  `json:"targetRevision"`
+			RepoUrl        string  `json:"repo_url"`
+			TargetRevision string  `json:"target_revision"`
 		} `json:"chart"`
 		Metadata *struct {
-			ArtifactHubHelmPackage *map[string]*interface{} `json:"artifactHubHelmPackage,omitempty"`
-			AutoDeploy             *bool                    `json:"autoDeploy,omitempty"`
+			ArtifactHubHelmPackage *map[string]*interface{} `json:"artifact_hub_helm_package,omitempty"`
+			AutoDeploy             *bool                    `json:"auto_deploy,omitempty"`
 			Image                  *struct {
 				Github *struct {
 					Repository *struct {
-						FullName string  `json:"fullName"`
-						HtmlUrl  string  `json:"htmlUrl"`
+						FullName string  `json:"full_name"`
+						HtmlUrl  string  `json:"html_url"`
 						Id       float32 `json:"id"`
 						Name     string  `json:"name"`
 						Owner    struct {
-							AvatarUrl string  `json:"avatarUrl"`
-							HtmlUrl   string  `json:"htmlUrl"`
+							AvatarUrl string  `json:"avatar_url"`
+							HtmlUrl   string  `json:"html_url"`
 							Id        float32 `json:"id"`
 							Login     string  `json:"login"`
 							Type      string  `json:"type"`
 						} `json:"owner"`
 					} `json:"repository,omitempty"`
-					WorkflowRunId *string `json:"workflowRunId,omitempty"`
+					WorkflowRunId *string `json:"workflow_run_id,omitempty"`
 				} `json:"github,omitempty"`
 				Tag string `json:"tag"`
 				Url string `json:"url"`
@@ -616,8 +631,8 @@ type GetV1UserTokensParams struct {
 
 // PostV1UserTokensJSONBody defines parameters for PostV1UserTokens.
 type PostV1UserTokensJSONBody struct {
-	// ExpiresInDays Token expiry in days. Omit for no expiry.
-	ExpiresInDays *int `json:"expiresInDays,omitempty"`
+	// ExpiresAt Unix timestamp (seconds) when the token expires. Omit for no expiry.
+	ExpiresAt *int `json:"expires_at,omitempty"`
 
 	// Name Human-readable name for the token
 	Name string `json:"name"`
@@ -762,14 +777,14 @@ type ClientInterface interface {
 	GetV1Installs(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1InstallsWithBody request with any body
-	PostV1InstallsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostV1InstallsWithBody(ctx context.Context, params *PostV1InstallsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostV1Installs(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostV1Installs(ctx context.Context, params *PostV1InstallsParams, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostV1InstallsStandaloneWithBody request with any body
-	PostV1InstallsStandaloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostV1InstallsStandaloneWithBody(ctx context.Context, params *PostV1InstallsStandaloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostV1InstallsStandalone(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostV1InstallsStandalone(ctx context.Context, params *PostV1InstallsStandaloneParams, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteV1InstallsId request
 	DeleteV1InstallsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -952,8 +967,8 @@ func (c *Client) GetV1Installs(ctx context.Context, params *GetV1InstallsParams,
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostV1InstallsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostV1InstallsRequestWithBody(c.Server, contentType, body)
+func (c *Client) PostV1InstallsWithBody(ctx context.Context, params *PostV1InstallsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -964,8 +979,8 @@ func (c *Client) PostV1InstallsWithBody(ctx context.Context, contentType string,
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostV1Installs(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostV1InstallsRequest(c.Server, body)
+func (c *Client) PostV1Installs(ctx context.Context, params *PostV1InstallsParams, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsRequest(c.Server, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -976,8 +991,8 @@ func (c *Client) PostV1Installs(ctx context.Context, body PostV1InstallsJSONRequ
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostV1InstallsStandaloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostV1InstallsStandaloneRequestWithBody(c.Server, contentType, body)
+func (c *Client) PostV1InstallsStandaloneWithBody(ctx context.Context, params *PostV1InstallsStandaloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsStandaloneRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -988,8 +1003,8 @@ func (c *Client) PostV1InstallsStandaloneWithBody(ctx context.Context, contentTy
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostV1InstallsStandalone(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostV1InstallsStandaloneRequest(c.Server, body)
+func (c *Client) PostV1InstallsStandalone(ctx context.Context, params *PostV1InstallsStandaloneParams, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1InstallsStandaloneRequest(c.Server, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1700,18 +1715,18 @@ func NewGetV1InstallsRequest(server string, params *GetV1InstallsParams) (*http.
 }
 
 // NewPostV1InstallsRequest calls the generic PostV1Installs builder with application/json body
-func NewPostV1InstallsRequest(server string, body PostV1InstallsJSONRequestBody) (*http.Request, error) {
+func NewPostV1InstallsRequest(server string, params *PostV1InstallsParams, body PostV1InstallsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostV1InstallsRequestWithBody(server, "application/json", bodyReader)
+	return NewPostV1InstallsRequestWithBody(server, params, "application/json", bodyReader)
 }
 
 // NewPostV1InstallsRequestWithBody generates requests for PostV1Installs with any type of body
-func NewPostV1InstallsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+func NewPostV1InstallsRequestWithBody(server string, params *PostV1InstallsParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1736,22 +1751,37 @@ func NewPostV1InstallsRequestWithBody(server string, contentType string, body io
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithLocation("simple", false, "idempotency-key", runtime.ParamLocationHeader, *params.IdempotencyKey)
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("idempotency-key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
 // NewPostV1InstallsStandaloneRequest calls the generic PostV1InstallsStandalone builder with application/json body
-func NewPostV1InstallsStandaloneRequest(server string, body PostV1InstallsStandaloneJSONRequestBody) (*http.Request, error) {
+func NewPostV1InstallsStandaloneRequest(server string, params *PostV1InstallsStandaloneParams, body PostV1InstallsStandaloneJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostV1InstallsStandaloneRequestWithBody(server, "application/json", bodyReader)
+	return NewPostV1InstallsStandaloneRequestWithBody(server, params, "application/json", bodyReader)
 }
 
 // NewPostV1InstallsStandaloneRequestWithBody generates requests for PostV1InstallsStandalone with any type of body
-func NewPostV1InstallsStandaloneRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+func NewPostV1InstallsStandaloneRequestWithBody(server string, params *PostV1InstallsStandaloneParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1775,6 +1805,21 @@ func NewPostV1InstallsStandaloneRequestWithBody(server string, contentType strin
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithLocation("simple", false, "idempotency-key", runtime.ParamLocationHeader, *params.IdempotencyKey)
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("idempotency-key", headerParam0)
+		}
+
+	}
 
 	return req, nil
 }
@@ -1942,7 +1987,7 @@ func NewGetV1InstallsIdLogsRequest(server string, id string, params *GetV1Instal
 
 		if params.SinceSeconds != nil {
 
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sinceSeconds", runtime.ParamLocationQuery, *params.SinceSeconds); err != nil {
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "since_seconds", runtime.ParamLocationQuery, *params.SinceSeconds); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -3081,14 +3126,14 @@ type ClientWithResponsesInterface interface {
 	GetV1InstallsWithResponse(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error)
 
 	// PostV1InstallsWithBodyWithResponse request with any body
-	PostV1InstallsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error)
+	PostV1InstallsWithBodyWithResponse(ctx context.Context, params *PostV1InstallsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error)
 
-	PostV1InstallsWithResponse(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error)
+	PostV1InstallsWithResponse(ctx context.Context, params *PostV1InstallsParams, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error)
 
 	// PostV1InstallsStandaloneWithBodyWithResponse request with any body
-	PostV1InstallsStandaloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error)
+	PostV1InstallsStandaloneWithBodyWithResponse(ctx context.Context, params *PostV1InstallsStandaloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error)
 
-	PostV1InstallsStandaloneWithResponse(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error)
+	PostV1InstallsStandaloneWithResponse(ctx context.Context, params *PostV1InstallsStandaloneParams, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error)
 
 	// DeleteV1InstallsIdWithResponse request
 	DeleteV1InstallsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1InstallsIdResponse, error)
@@ -3239,12 +3284,10 @@ func (r DeleteV1ClustersIdResponse) StatusCode() int {
 type GetV1ClustersIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data Cluster `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
-	JSON404 *Error
+	JSON200      *Cluster
+	JSON401      *Error
+	JSON403      *Error
+	JSON404      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3266,13 +3309,11 @@ func (r GetV1ClustersIdResponse) StatusCode() int {
 type PatchV1ClustersIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data Cluster `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
-	JSON404 *Error
-	JSON422 *Error
+	JSON200      *Cluster
+	JSON401      *Error
+	JSON403      *Error
+	JSON404      *Error
+	JSON422      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3415,11 +3456,9 @@ func (r DeleteV1InstallsIdResponse) StatusCode() int {
 type GetV1InstallsIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data Install `json:"data"`
-	}
-	JSON401 *Error
-	JSON404 *Error
+	JSON200      *Install
+	JSON401      *Error
+	JSON404      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3563,10 +3602,8 @@ type PostV1ProductsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON201      *struct {
-		Data struct {
-			ProductId  string `json:"productId"`
-			TemplateId string `json:"templateId"`
-		} `json:"data"`
+		ProductId  string `json:"product_id"`
+		TemplateId string `json:"template_id"`
 	}
 	JSON401 *Error
 	JSON403 *Error
@@ -3616,11 +3653,9 @@ func (r DeleteV1ProductsIdResponse) StatusCode() int {
 type GetV1ProductsIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data Product `json:"data"`
-	}
-	JSON401 *Error
-	JSON404 *Error
+	JSON200      *Product
+	JSON401      *Error
+	JSON404      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3643,10 +3678,8 @@ type PatchV1ProductsIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Data struct {
-			ProductId  string `json:"productId"`
-			TemplateId string `json:"templateId"`
-		} `json:"data"`
+		ProductId  string `json:"product_id"`
+		TemplateId string `json:"template_id"`
 	}
 	JSON401 *Error
 	JSON404 *Error
@@ -3696,12 +3729,10 @@ func (r GetV1RegionsResponse) StatusCode() int {
 type PostV1RegionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *struct {
-		Data Region `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
-	JSON422 *Error
+	JSON201      *Region
+	JSON401      *Error
+	JSON403      *Error
+	JSON422      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3819,9 +3850,7 @@ type PostV1TemplatesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON201      *struct {
-		Data struct {
-			TemplateId string `json:"templateId"`
-		} `json:"data"`
+		TemplateId string `json:"template_id"`
 	}
 	JSON401 *Error
 	JSON403 *Error
@@ -3871,11 +3900,9 @@ func (r DeleteV1TemplatesIdResponse) StatusCode() int {
 type GetV1TemplatesIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data TemplateDetail `json:"data"`
-	}
-	JSON401 *Error
-	JSON404 *Error
+	JSON200      *TemplateDetail
+	JSON401      *Error
+	JSON404      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3898,9 +3925,7 @@ type PatchV1TemplatesIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Data struct {
-			TemplateId string `json:"templateId"`
-		} `json:"data"`
+		TemplateId string `json:"template_id"`
 	}
 	JSON401 *Error
 	JSON404 *Error
@@ -3949,10 +3974,8 @@ func (r GetV1UserTokensResponse) StatusCode() int {
 type PostV1UserTokensResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *struct {
-		Data CreatedToken `json:"data"`
-	}
-	JSON401 *Error
+	JSON201      *CreatedToken
+	JSON401      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -4020,12 +4043,10 @@ func (r GetV1WorkspacesResponse) StatusCode() int {
 type GetV1WorkspacesIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Data Workspace `json:"data"`
-	}
-	JSON401 *Error
-	JSON403 *Error
-	JSON404 *Error
+	JSON200      *Workspace
+	JSON401      *Error
+	JSON403      *Error
+	JSON404      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -4107,16 +4128,16 @@ func (c *ClientWithResponses) GetV1InstallsWithResponse(ctx context.Context, par
 }
 
 // PostV1InstallsWithBodyWithResponse request with arbitrary body returning *PostV1InstallsResponse
-func (c *ClientWithResponses) PostV1InstallsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error) {
-	rsp, err := c.PostV1InstallsWithBody(ctx, contentType, body, reqEditors...)
+func (c *ClientWithResponses) PostV1InstallsWithBodyWithResponse(ctx context.Context, params *PostV1InstallsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error) {
+	rsp, err := c.PostV1InstallsWithBody(ctx, params, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParsePostV1InstallsResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostV1InstallsWithResponse(ctx context.Context, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error) {
-	rsp, err := c.PostV1Installs(ctx, body, reqEditors...)
+func (c *ClientWithResponses) PostV1InstallsWithResponse(ctx context.Context, params *PostV1InstallsParams, body PostV1InstallsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsResponse, error) {
+	rsp, err := c.PostV1Installs(ctx, params, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -4124,16 +4145,16 @@ func (c *ClientWithResponses) PostV1InstallsWithResponse(ctx context.Context, bo
 }
 
 // PostV1InstallsStandaloneWithBodyWithResponse request with arbitrary body returning *PostV1InstallsStandaloneResponse
-func (c *ClientWithResponses) PostV1InstallsStandaloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error) {
-	rsp, err := c.PostV1InstallsStandaloneWithBody(ctx, contentType, body, reqEditors...)
+func (c *ClientWithResponses) PostV1InstallsStandaloneWithBodyWithResponse(ctx context.Context, params *PostV1InstallsStandaloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error) {
+	rsp, err := c.PostV1InstallsStandaloneWithBody(ctx, params, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParsePostV1InstallsStandaloneResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostV1InstallsStandaloneWithResponse(ctx context.Context, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error) {
-	rsp, err := c.PostV1InstallsStandalone(ctx, body, reqEditors...)
+func (c *ClientWithResponses) PostV1InstallsStandaloneWithResponse(ctx context.Context, params *PostV1InstallsStandaloneParams, body PostV1InstallsStandaloneJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1InstallsStandaloneResponse, error) {
+	rsp, err := c.PostV1InstallsStandalone(ctx, params, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -4548,9 +4569,7 @@ func ParseGetV1ClustersIdResponse(rsp *http.Response) (*GetV1ClustersIdResponse,
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data Cluster `json:"data"`
-		}
+		var dest Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4597,9 +4616,7 @@ func ParsePatchV1ClustersIdResponse(rsp *http.Response) (*PatchV1ClustersIdRespo
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data Cluster `json:"data"`
-		}
+		var dest Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4860,9 +4877,7 @@ func ParseGetV1InstallsIdResponse(rsp *http.Response) (*GetV1InstallsIdResponse,
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data Install `json:"data"`
-		}
+		var dest Install
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5098,10 +5113,8 @@ func ParsePostV1ProductsResponse(rsp *http.Response) (*PostV1ProductsResponse, e
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
 		var dest struct {
-			Data struct {
-				ProductId  string `json:"productId"`
-				TemplateId string `json:"templateId"`
-			} `json:"data"`
+			ProductId  string `json:"product_id"`
+			TemplateId string `json:"template_id"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -5189,9 +5202,7 @@ func ParseGetV1ProductsIdResponse(rsp *http.Response) (*GetV1ProductsIdResponse,
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data Product `json:"data"`
-		}
+		var dest Product
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5232,10 +5243,8 @@ func ParsePatchV1ProductsIdResponse(rsp *http.Response) (*PatchV1ProductsIdRespo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Data struct {
-				ProductId  string `json:"productId"`
-				TemplateId string `json:"templateId"`
-			} `json:"data"`
+			ProductId  string `json:"product_id"`
+			TemplateId string `json:"template_id"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -5323,9 +5332,7 @@ func ParsePostV1RegionsResponse(rsp *http.Response) (*PostV1RegionsResponse, err
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest struct {
-			Data Region `json:"data"`
-		}
+		var dest Region
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5526,9 +5533,7 @@ func ParsePostV1TemplatesResponse(rsp *http.Response) (*PostV1TemplatesResponse,
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
 		var dest struct {
-			Data struct {
-				TemplateId string `json:"templateId"`
-			} `json:"data"`
+			TemplateId string `json:"template_id"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -5616,9 +5621,7 @@ func ParseGetV1TemplatesIdResponse(rsp *http.Response) (*GetV1TemplatesIdRespons
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data TemplateDetail `json:"data"`
-		}
+		var dest TemplateDetail
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5659,9 +5662,7 @@ func ParsePatchV1TemplatesIdResponse(rsp *http.Response) (*PatchV1TemplatesIdRes
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Data struct {
-				TemplateId string `json:"templateId"`
-			} `json:"data"`
+			TemplateId string `json:"template_id"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -5742,9 +5743,7 @@ func ParsePostV1UserTokensResponse(rsp *http.Response) (*PostV1UserTokensRespons
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest struct {
-			Data CreatedToken `json:"data"`
-		}
+		var dest CreatedToken
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5843,9 +5842,7 @@ func ParseGetV1WorkspacesIdResponse(rsp *http.Response) (*GetV1WorkspacesIdRespo
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Data Workspace `json:"data"`
-		}
+		var dest Workspace
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
