@@ -13,6 +13,8 @@ import (
 	"net/url"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/oapi-codegen/runtime"
 )
 
@@ -753,6 +755,9 @@ type ClientInterface interface {
 
 	PatchV1ClustersId(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetV1ClustersIdKubeconfig request
+	GetV1ClustersIdKubeconfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV1Installs request
 	GetV1Installs(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -913,6 +918,18 @@ func (c *Client) PatchV1ClustersIdWithBody(ctx context.Context, id string, conte
 
 func (c *Client) PatchV1ClustersId(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchV1ClustersIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1ClustersIdKubeconfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1ClustersIdKubeconfigRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1579,6 +1596,40 @@ func NewPatchV1ClustersIdRequestWithBody(server string, id string, contentType s
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetV1ClustersIdKubeconfigRequest generates requests for GetV1ClustersIdKubeconfig
+func NewGetV1ClustersIdKubeconfigRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/clusters/%s/kubeconfig", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -3023,6 +3074,9 @@ type ClientWithResponsesInterface interface {
 
 	PatchV1ClustersIdWithResponse(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1ClustersIdResponse, error)
 
+	// GetV1ClustersIdKubeconfigWithResponse request
+	GetV1ClustersIdKubeconfigWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1ClustersIdKubeconfigResponse, error)
+
 	// GetV1InstallsWithResponse request
 	GetV1InstallsWithResponse(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error)
 
@@ -3231,6 +3285,32 @@ func (r PatchV1ClustersIdResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PatchV1ClustersIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1ClustersIdKubeconfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	YAML200      *string
+	JSON400      *Error
+	JSON401      *Error
+	JSON403      *Error
+	JSON404      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1ClustersIdKubeconfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1ClustersIdKubeconfigResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4008,6 +4088,15 @@ func (c *ClientWithResponses) PatchV1ClustersIdWithResponse(ctx context.Context,
 	return ParsePatchV1ClustersIdResponse(rsp)
 }
 
+// GetV1ClustersIdKubeconfigWithResponse request returning *GetV1ClustersIdKubeconfigResponse
+func (c *ClientWithResponses) GetV1ClustersIdKubeconfigWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1ClustersIdKubeconfigResponse, error) {
+	rsp, err := c.GetV1ClustersIdKubeconfig(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1ClustersIdKubeconfigResponse(rsp)
+}
+
 // GetV1InstallsWithResponse request returning *GetV1InstallsResponse
 func (c *ClientWithResponses) GetV1InstallsWithResponse(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error) {
 	rsp, err := c.GetV1Installs(ctx, params, reqEditors...)
@@ -4543,6 +4632,60 @@ func ParsePatchV1ClustersIdResponse(rsp *http.Response) (*PatchV1ClustersIdRespo
 			return nil, err
 		}
 		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1ClustersIdKubeconfigResponse parses an HTTP response from a GetV1ClustersIdKubeconfigWithResponse call
+func ParseGetV1ClustersIdKubeconfigResponse(rsp *http.Response) (*GetV1ClustersIdKubeconfigResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1ClustersIdKubeconfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "yaml") && rsp.StatusCode == 200:
+		var dest string
+		if err := yaml.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.YAML200 = &dest
 
 	}
 

@@ -1,7 +1,10 @@
 package clusters
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/cnap-tech/cli/internal/api"
@@ -21,6 +24,7 @@ func NewCmdClusters() *cobra.Command {
 	cmd.AddCommand(newCmdGet())
 	cmd.AddCommand(newCmdUpdate())
 	cmd.AddCommand(newCmdDelete())
+	cmd.AddCommand(newCmdKubeconfig())
 
 	return cmd
 }
@@ -217,6 +221,57 @@ func newCmdDelete() *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&force, "force", false, "Confirm deletion")
+
+	return cmd
+}
+
+func newCmdKubeconfig() *cobra.Command {
+	var outputFile string
+
+	cmd := &cobra.Command{
+		Use:   "kubeconfig <cluster-id>",
+		Short: "Get cluster admin kubeconfig",
+		Long:  "Downloads the admin kubeconfig for a KaaS-managed cluster. The cluster must be running.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, _, err := cmdutil.NewClient()
+			if err != nil {
+				return err
+			}
+
+			resp, err := client.GetV1ClustersIdKubeconfig(cmd.Context(), args[0])
+			if err != nil {
+				return fmt.Errorf("fetching kubeconfig: %w", err)
+			}
+			defer func() { _ = resp.Body.Close() }()
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return fmt.Errorf("reading response: %w", err)
+			}
+
+			if resp.StatusCode != 200 {
+				var apiErr api.Error
+				if json.Unmarshal(body, &apiErr) == nil {
+					return fmt.Errorf("%s", apiErr.Error.Message)
+				}
+				return fmt.Errorf("unexpected response: %s", resp.Status)
+			}
+
+			if outputFile != "" {
+				if err := os.WriteFile(outputFile, body, 0600); err != nil {
+					return fmt.Errorf("writing kubeconfig: %w", err)
+				}
+				fmt.Printf("Kubeconfig written to %s\n", outputFile)
+				return nil
+			}
+
+			fmt.Print(string(body))
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "Write kubeconfig to file (mode 0600)")
 
 	return cmd
 }
