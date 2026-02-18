@@ -4,16 +4,13 @@
 //  1. POST /api/auth/device/code           - device_code + user_code
 //  2. Open browser to /device?user_code=X  - user approves
 //  3. POST /api/auth/device/token (poll)   - session token (access_token)
-//  4. GET  /api/auth/convex/token          - Convex JWT (Bearer session token)
-//  5. POST /v1/user/tokens                 - PAT (Bearer Convex JWT)
-//  6. Store PAT in ~/.cnap/config.yaml     - all subsequent CLI requests use PAT
+//  4. Store session token in ~/.cnap/config.yaml
 //
-// Why exchange session for Convex JWT then PAT?
-//   - The device flow returns an opaque session token (not a JWT)
-//   - The public API middleware only accepts JWTs or PATs, not session tokens
-//   - BetterAuth's convex plugin provides /api/auth/convex/token which converts
-//     a session token (via Bearer header) into a Convex JWT
-//   - The PAT is stored permanently; the session/JWT are discarded after bootstrap
+// The session token is sent as a Bearer token in subsequent API requests.
+// The public API middleware validates it via BetterAuth's get-session endpoint.
+// Sessions are valid for 1 year and auto-refresh on use, so active users never expire.
+//
+// For CI/CD, PATs (cnap_pat_...) are still supported via --token flag.
 //
 // See also: public-api.middleware.ts (server-side token verification)
 package auth
@@ -57,18 +54,6 @@ type deviceTokenError struct {
 	ErrorDescription string `json:"error_description"`
 }
 
-type jwtTokenResponse struct {
-	Token string `json:"token"`
-}
-
-type createdTokenResponse struct {
-	Data struct {
-		ID    string `json:"id"`
-		Name  string `json:"name"`
-		Token string `json:"token"`
-	} `json:"data"`
-}
-
 func runDeviceFlow(ctx context.Context, cfg *config.Config) error {
 	authURL := cfg.AuthBaseURL()
 	slog.Debug("starting device flow", "auth_url", authURL, "api_url", cfg.BaseURL())
@@ -91,7 +76,7 @@ func runDeviceFlow(ctx context.Context, cfg *config.Config) error {
 		fmt.Println("Browser opened. Waiting for authorization...")
 	}
 
-	// Step 3: Poll for token
+	// Step 3: Poll for session token
 	interval := time.Duration(code.Interval) * time.Second
 	if interval < 5*time.Second {
 		interval = 5 * time.Second
@@ -103,28 +88,13 @@ func runDeviceFlow(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 
-	slog.Debug("device flow authorized, exchanging tokens")
-	fmt.Println("\nAuthorized! Creating API token...")
-
-	// Step 4: Exchange session token for a JWT (the public API middleware verifies JWTs, not session tokens)
-	jwtToken, err := exchangeSessionForJWT(ctx, authURL, sessionToken)
-	if err != nil {
-		return fmt.Errorf("exchanging session for JWT: %w", err)
-	}
-
-	// Step 5: Use JWT to create a PAT via the public API
-	pat, err := createPATFromJWT(ctx, cfg, jwtToken)
-	if err != nil {
-		return fmt.Errorf("creating API token: %w", err)
-	}
-
-	// Step 6: Store PAT in config
-	cfg.Auth.Token = pat
+	// Step 4: Store session token directly
+	cfg.Auth.Token = sessionToken
 	if err := cfg.Save(); err != nil {
 		return fmt.Errorf("saving config: %w", err)
 	}
 
-	fmt.Println("Logged in successfully. Token saved to ~/.cnap/config.yaml")
+	fmt.Println("\nLogged in successfully. Session token saved to ~/.cnap/config.yaml")
 	return nil
 }
 
@@ -217,72 +187,6 @@ func pollForToken(ctx context.Context, authURL, deviceCode string, interval time
 			return "", fmt.Errorf("unexpected error: %s — %s", errResp.Error, errResp.ErrorDescription)
 		}
 	}
-}
-
-// exchangeSessionForJWT calls BetterAuth's /api/auth/convex/token endpoint
-// with the session token as a Bearer header. The bearer() plugin on the server
-// converts this to a signed session cookie, and the convex plugin issues a JWT
-// that can be verified via /api/auth/convex/jwks (same as the dashboard auth).
-func exchangeSessionForJWT(ctx context.Context, authURL, sessionToken string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", authURL+"/api/auth/convex/token", nil)
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Authorization", "Bearer "+sessionToken)
-	req.Header.Set("User-Agent", useragent.String())
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close() //nolint:errcheck
-
-	if resp.StatusCode != 200 {
-		data, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(data))
-	}
-
-	var result jwtTokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
-	}
-	if result.Token == "" {
-		return "", fmt.Errorf("empty JWT token in response")
-	}
-	return result.Token, nil
-}
-
-func createPATFromJWT(ctx context.Context, cfg *config.Config, jwtToken string) (string, error) {
-	apiURL := cfg.BaseURL() + "/v1"
-
-	body, _ := json.Marshal(map[string]string{
-		"name": "CLI (auto)",
-	})
-
-	req, err := http.NewRequestWithContext(ctx, "POST", apiURL+"/user/tokens", bytes.NewReader(body))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Authorization", "Bearer "+jwtToken)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", useragent.String())
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close() //nolint:errcheck
-
-	if resp.StatusCode != 201 {
-		data, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(data))
-	}
-
-	var result createdTokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
-	}
-	return result.Data.Token, nil
 }
 
 func formatUserCode(code string) string {

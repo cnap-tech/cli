@@ -1,12 +1,14 @@
 package registry
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/cnap-tech/cli/internal/api"
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/cnap-tech/cli/internal/output"
+	"github.com/cnap-tech/cli/internal/prompt"
 	"github.com/spf13/cobra"
 )
 
@@ -28,8 +30,9 @@ func newCmdList() *cobra.Command {
 	var cursor string
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List registry credentials in the active workspace",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List registry credentials in the active workspace",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
@@ -88,15 +91,15 @@ func newCmdList() *cobra.Command {
 }
 
 func newCmdDelete() *cobra.Command {
-	var force bool
+	var yes bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <credential-id>",
+		Use:   "delete [credential-id]",
 		Short: "Delete a registry credential",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !force {
-				return fmt.Errorf("this will permanently delete the credential. Use --force to confirm")
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<credential-id> argument required when not running interactively")
 			}
 
 			client, _, err := cmdutil.NewClient()
@@ -104,7 +107,31 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1RegistryCredentialsIdWithResponse(cmd.Context(), args[0])
+			credentialID := ""
+			if len(args) > 0 {
+				credentialID = args[0]
+			} else {
+				credentialID, err = pickCredential(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			if !yes {
+				if !prompt.IsInteractive() {
+					return fmt.Errorf("use --yes to confirm deletion in non-interactive mode")
+				}
+				confirmed, err := prompt.Confirm(fmt.Sprintf("Delete registry credential %s?", credentialID))
+				if err != nil {
+					return err
+				}
+				if !confirmed {
+					fmt.Println("Cancelled.")
+					return nil
+				}
+			}
+
+			resp, err := client.DeleteV1RegistryCredentialsIdWithResponse(cmd.Context(), credentialID)
 			if err != nil {
 				return fmt.Errorf("deleting credential: %w", err)
 			}
@@ -112,14 +139,34 @@ func newCmdDelete() *cobra.Command {
 				return apiError(resp.Status(), resp.JSON401, resp.JSON404)
 			}
 
-			fmt.Printf("Registry credential %s deleted.\n", args[0])
+			fmt.Printf("Registry credential %s deleted.\n", credentialID)
 			return nil
 		},
 	}
 
-	cmd.Flags().BoolVar(&force, "force", false, "Confirm deletion")
+	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Skip confirmation prompt")
 
 	return cmd
+}
+
+// pickCredential shows an interactive registry credential picker. Returns the selected credential ID.
+func pickCredential(ctx context.Context, client *api.ClientWithResponses) (string, error) {
+	limit := 100
+	listResp, err := client.GetV1RegistryCredentialsWithResponse(ctx, &api.GetV1RegistryCredentialsParams{Limit: &limit})
+	if err != nil {
+		return "", fmt.Errorf("fetching registry credentials: %w", err)
+	}
+	if listResp.JSON200 == nil {
+		return "", apiError(listResp.Status(), listResp.JSON401, listResp.JSON403)
+	}
+	if len(listResp.JSON200.Data) == 0 {
+		return "", fmt.Errorf("no registry credentials found in this workspace")
+	}
+	options := make([]prompt.SelectOption, len(listResp.JSON200.Data))
+	for i, c := range listResp.JSON200.Data {
+		options[i] = prompt.SelectOption{Label: c.Name + " (" + c.RegistryUrl + ")", Value: c.Id}
+	}
+	return prompt.Select("Select a credential", options)
 }
 
 func apiError(status string, errs ...*api.Error) error {

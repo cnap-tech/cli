@@ -13,7 +13,7 @@ import (
 func NewCmdRegions() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "regions",
-		Aliases: []string{"rg"},
+		Aliases: []string{"region", "rg"},
 		Short:   "Manage regions",
 	}
 
@@ -28,8 +28,9 @@ func newCmdList() *cobra.Command {
 	var cursor string
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List regions in the active workspace",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List regions in the active workspace",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {

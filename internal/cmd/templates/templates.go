@@ -1,19 +1,21 @@
 package templates
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/cnap-tech/cli/internal/api"
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/cnap-tech/cli/internal/output"
+	"github.com/cnap-tech/cli/internal/prompt"
 	"github.com/spf13/cobra"
 )
 
 func NewCmdTemplates() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "templates",
-		Aliases: []string{"tpl"},
+		Aliases: []string{"template", "tpl"},
 		Short:   "Manage templates",
 	}
 
@@ -29,8 +31,9 @@ func newCmdList() *cobra.Command {
 	var cursor string
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List templates in the active workspace",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List templates in the active workspace",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
@@ -90,16 +93,30 @@ func newCmdList() *cobra.Command {
 
 func newCmdGet() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get <template-id>",
+		Use:   "get [template-id]",
 		Short: "Get template details with helm sources",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<template-id> argument required when not running interactively")
+			}
+
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.GetV1TemplatesIdWithResponse(cmd.Context(), args[0])
+			templateID := ""
+			if len(args) > 0 {
+				templateID = args[0]
+			} else {
+				templateID, err = pickTemplate(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			resp, err := client.GetV1TemplatesIdWithResponse(cmd.Context(), templateID)
 			if err != nil {
 				return fmt.Errorf("fetching template: %w", err)
 			}
@@ -149,15 +166,15 @@ func newCmdGet() *cobra.Command {
 }
 
 func newCmdDelete() *cobra.Command {
-	var force bool
+	var yes bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <template-id>",
+		Use:   "delete [template-id]",
 		Short: "Delete a template",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !force {
-				return fmt.Errorf("this will permanently delete the template. Use --force to confirm")
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<template-id> argument required when not running interactively")
 			}
 
 			client, _, err := cmdutil.NewClient()
@@ -165,7 +182,31 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1TemplatesIdWithResponse(cmd.Context(), args[0])
+			templateID := ""
+			if len(args) > 0 {
+				templateID = args[0]
+			} else {
+				templateID, err = pickTemplate(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			if !yes {
+				if !prompt.IsInteractive() {
+					return fmt.Errorf("use --yes to confirm deletion in non-interactive mode")
+				}
+				confirmed, err := prompt.Confirm(fmt.Sprintf("Delete template %s?", templateID))
+				if err != nil {
+					return err
+				}
+				if !confirmed {
+					fmt.Println("Cancelled.")
+					return nil
+				}
+			}
+
+			resp, err := client.DeleteV1TemplatesIdWithResponse(cmd.Context(), templateID)
 			if err != nil {
 				return fmt.Errorf("deleting template: %w", err)
 			}
@@ -173,14 +214,34 @@ func newCmdDelete() *cobra.Command {
 				return apiError(resp.Status(), resp.JSON401, resp.JSON404)
 			}
 
-			fmt.Printf("Template %s deleted.\n", args[0])
+			fmt.Printf("Template %s deleted.\n", templateID)
 			return nil
 		},
 	}
 
-	cmd.Flags().BoolVar(&force, "force", false, "Confirm deletion")
+	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Skip confirmation prompt")
 
 	return cmd
+}
+
+// pickTemplate shows an interactive template picker. Returns the selected template ID.
+func pickTemplate(ctx context.Context, client *api.ClientWithResponses) (string, error) {
+	limit := 100
+	listResp, err := client.GetV1TemplatesWithResponse(ctx, &api.GetV1TemplatesParams{Limit: &limit})
+	if err != nil {
+		return "", fmt.Errorf("fetching templates: %w", err)
+	}
+	if listResp.JSON200 == nil {
+		return "", apiError(listResp.Status(), listResp.JSON401, listResp.JSON403)
+	}
+	if len(listResp.JSON200.Data) == 0 {
+		return "", fmt.Errorf("no templates found in this workspace")
+	}
+	options := make([]prompt.SelectOption, len(listResp.JSON200.Data))
+	for i, t := range listResp.JSON200.Data {
+		options[i] = prompt.SelectOption{Label: t.Name + " (" + t.Id + ")", Value: t.Id}
+	}
+	return prompt.Select("Select a template", options)
 }
 
 func apiError(status string, errs ...*api.Error) error {

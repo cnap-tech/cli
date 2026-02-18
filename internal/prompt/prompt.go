@@ -52,3 +52,26 @@ func Select(title string, options []SelectOption) (string, error) {
 
 	return selected, nil
 }
+
+// Confirm shows a yes/no confirmation prompt with the given message.
+// Returns true if the user confirmed, false if they declined.
+// Returns ErrNonInteractive if stdin is not a TTY.
+func Confirm(message string) (bool, error) {
+	if !IsInteractive() {
+		return false, ErrNonInteractive
+	}
+
+	var confirmed bool
+	err := huh.NewConfirm().
+		Title(message).
+		Affirmative("Yes").
+		Negative("No").
+		Value(&confirmed).
+		WithTheme(ThemeCNAP()).
+		Run()
+	if err != nil {
+		return false, err
+	}
+
+	return confirmed, nil
+}

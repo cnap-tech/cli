@@ -33,7 +33,7 @@ func NewClient() (*api.ClientWithResponses, *config.Config, error) {
 
 	token := cfg.Token()
 	if token == "" {
-		return nil, nil, fmt.Errorf("not authenticated. Run: cnap auth login --token <your-token>")
+		return nil, nil, fmt.Errorf("not authenticated. Run: cnap auth login")
 	}
 
 	baseURL := cfg.BaseURL()

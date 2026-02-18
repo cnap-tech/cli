@@ -1,19 +1,21 @@
 package products
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/cnap-tech/cli/internal/api"
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/cnap-tech/cli/internal/output"
+	"github.com/cnap-tech/cli/internal/prompt"
 	"github.com/spf13/cobra"
 )
 
 func NewCmdProducts() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "products",
-		Aliases: []string{"prod"},
+		Aliases: []string{"product", "prod"},
 		Short:   "Manage products",
 	}
 
@@ -29,8 +31,9 @@ func newCmdList() *cobra.Command {
 	var cursor string
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List products in the active workspace",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List products in the active workspace",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
@@ -86,16 +89,30 @@ func newCmdList() *cobra.Command {
 
 func newCmdGet() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get <product-id>",
+		Use:   "get [product-id]",
 		Short: "Get product details",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<product-id> argument required when not running interactively")
+			}
+
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.GetV1ProductsIdWithResponse(cmd.Context(), args[0])
+			productID := ""
+			if len(args) > 0 {
+				productID = args[0]
+			} else {
+				productID, err = pickProduct(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			resp, err := client.GetV1ProductsIdWithResponse(cmd.Context(), productID)
 			if err != nil {
 				return fmt.Errorf("fetching product: %w", err)
 			}
@@ -125,16 +142,16 @@ func newCmdGet() *cobra.Command {
 }
 
 func newCmdDelete() *cobra.Command {
-	var force bool
+	var yes bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <product-id>",
+		Use:   "delete [product-id]",
 		Short: "Delete a product",
 		Long:  "Delete a product. Fails if the product has active installs.",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !force {
-				return fmt.Errorf("this will permanently delete the product. Use --force to confirm")
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<product-id> argument required when not running interactively")
 			}
 
 			client, _, err := cmdutil.NewClient()
@@ -142,7 +159,31 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1ProductsIdWithResponse(cmd.Context(), args[0])
+			productID := ""
+			if len(args) > 0 {
+				productID = args[0]
+			} else {
+				productID, err = pickProduct(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			if !yes {
+				if !prompt.IsInteractive() {
+					return fmt.Errorf("use --yes to confirm deletion in non-interactive mode")
+				}
+				confirmed, err := prompt.Confirm(fmt.Sprintf("Delete product %s?", productID))
+				if err != nil {
+					return err
+				}
+				if !confirmed {
+					fmt.Println("Cancelled.")
+					return nil
+				}
+			}
+
+			resp, err := client.DeleteV1ProductsIdWithResponse(cmd.Context(), productID)
 			if err != nil {
 				return fmt.Errorf("deleting product: %w", err)
 			}
@@ -150,14 +191,34 @@ func newCmdDelete() *cobra.Command {
 				return apiError(resp.Status(), resp.JSON401, resp.JSON404, resp.JSON409)
 			}
 
-			fmt.Printf("Product %s deleted.\n", args[0])
+			fmt.Printf("Product %s deleted.\n", productID)
 			return nil
 		},
 	}
 
-	cmd.Flags().BoolVar(&force, "force", false, "Confirm deletion")
+	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Skip confirmation prompt")
 
 	return cmd
+}
+
+// pickProduct shows an interactive product picker. Returns the selected product ID.
+func pickProduct(ctx context.Context, client *api.ClientWithResponses) (string, error) {
+	limit := 100
+	listResp, err := client.GetV1ProductsWithResponse(ctx, &api.GetV1ProductsParams{Limit: &limit})
+	if err != nil {
+		return "", fmt.Errorf("fetching products: %w", err)
+	}
+	if listResp.JSON200 == nil {
+		return "", apiError(listResp.Status(), listResp.JSON401, listResp.JSON403)
+	}
+	if len(listResp.JSON200.Data) == 0 {
+		return "", fmt.Errorf("no products found in this workspace")
+	}
+	options := make([]prompt.SelectOption, len(listResp.JSON200.Data))
+	for i, p := range listResp.JSON200.Data {
+		options[i] = prompt.SelectOption{Label: p.Name + " (" + p.Id + ")", Value: p.Id}
+	}
+	return prompt.Select("Select a product", options)
 }
 
 func apiError(status string, errs ...*api.Error) error {

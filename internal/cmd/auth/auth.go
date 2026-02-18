@@ -1,9 +1,15 @@
 package auth
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"log/slog"
+	"net/http"
+	"strings"
 
 	"github.com/cnap-tech/cli/internal/config"
+	"github.com/cnap-tech/cli/internal/useragent"
 	"github.com/spf13/cobra"
 )
 
@@ -26,12 +32,14 @@ func newCmdLogin() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "login",
 		Short: "Authenticate with CNAP",
-		Long: `Authenticate via browser (default) or with a Personal Access Token.
+		Long: `Authenticate via browser (default) or with a token.
 
-Without flags, opens your browser to authenticate via the device flow.
-With --token, stores the given Personal Access Token directly.
+Without flags, opens your browser to authenticate via the device flow
+and stores a session token. Sessions are long-lived and auto-refresh on use.
 
-Create tokens at https://dash.cnap.tech/settings/tokens`,
+With --token, stores the given token directly (PAT or session token).
+
+Create PATs at https://dash.cnap.tech/settings/tokens`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.Load()
 			if err != nil {
@@ -51,7 +59,7 @@ Create tokens at https://dash.cnap.tech/settings/tokens`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&token, "token", "t", "", "Personal Access Token (cnap_pat_...)")
+	cmd.Flags().StringVarP(&token, "token", "t", "", "API token (PAT or session token)")
 
 	return cmd
 }
@@ -66,12 +74,20 @@ func newCmdLogout() *cobra.Command {
 				return err
 			}
 
+			// Revoke session server-side if it's a session token
+			token := cfg.Token()
+			if token != "" && !strings.HasPrefix(token, "cnap_pat_") && !strings.HasPrefix(token, "eyJ") {
+				if err := revokeSession(cmd.Context(), cfg, token); err != nil {
+					slog.Debug("failed to revoke session server-side", "error", err)
+				}
+			}
+
 			cfg.Auth.Token = ""
 			if err := cfg.Save(); err != nil {
 				return fmt.Errorf("saving config: %w", err)
 			}
 
-			fmt.Println("Logged out. Token removed from ~/.cnap/config.yaml")
+			fmt.Println("Logged out. Credentials removed from ~/.cnap/config.yaml")
 			return nil
 		},
 	}
@@ -89,18 +105,29 @@ func newCmdStatus() *cobra.Command {
 
 			token := cfg.Token()
 			if token == "" {
-				fmt.Println("Not authenticated. Run: cnap auth login --token <your-token>")
+				fmt.Println("Not authenticated. Run: cnap auth login")
 				return nil
 			}
+
+			tokenType := detectTokenType(token)
 
 			// Show prefix only for security
 			prefix := token
 			if len(prefix) > 16 {
 				prefix = prefix[:16] + "..."
 			}
-			fmt.Printf("Authenticated with token: %s\n", prefix)
+
+			fmt.Printf("Token type: %s\n", tokenType)
+			fmt.Printf("Token: %s\n", prefix)
 			fmt.Printf("API URL: %s\n", cfg.BaseURL())
 			fmt.Printf("Auth URL: %s\n", cfg.AuthBaseURL())
+
+			if tokenType == "Session token" {
+				if err := checkSessionStatus(cmd.Context(), cfg, token); err != nil {
+					fmt.Printf("Session status: invalid or expired (%v)\n", err)
+					fmt.Println("Run 'cnap auth login' to re-authenticate.")
+				}
+			}
 
 			if cfg.ActiveWorkspace != "" {
 				fmt.Printf("Active workspace: %s\n", cfg.ActiveWorkspace)
@@ -111,4 +138,67 @@ func newCmdStatus() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func detectTokenType(token string) string {
+	switch {
+	case strings.HasPrefix(token, "cnap_pat_"):
+		return "Personal Access Token (PAT)"
+	case strings.HasPrefix(token, "eyJ"):
+		return "JWT"
+	default:
+		return "Session token"
+	}
+}
+
+func checkSessionStatus(ctx context.Context, cfg *config.Config, token string) error {
+	authURL := cfg.AuthBaseURL()
+	req, err := http.NewRequestWithContext(ctx, "GET", authURL+"/api/auth/get-session", nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("User-Agent", useragent.String())
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close() //nolint:errcheck
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Session *struct {
+			ExpiresAt string `json:"expiresAt"`
+		} `json:"session"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return err
+	}
+	if result.Session == nil {
+		return fmt.Errorf("session not found or expired")
+	}
+
+	fmt.Printf("Session status: active (expires: %s)\n", result.Session.ExpiresAt)
+	return nil
+}
+
+func revokeSession(ctx context.Context, cfg *config.Config, token string) error {
+	authURL := cfg.AuthBaseURL()
+	req, err := http.NewRequestWithContext(ctx, "POST", authURL+"/api/auth/sign-out", nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("User-Agent", useragent.String())
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close() //nolint:errcheck
+	return nil
 }

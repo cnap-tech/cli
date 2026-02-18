@@ -13,7 +13,7 @@ import (
 func NewCmdWorkspaces() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "workspaces",
-		Aliases: []string{"ws"},
+		Aliases: []string{"workspace", "ws"},
 		Short:   "Manage workspaces",
 	}
 
@@ -28,8 +28,9 @@ func newCmdList() *cobra.Command {
 	var cursor string
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List your workspaces",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List your workspaces",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {

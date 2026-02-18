@@ -27,7 +27,7 @@ import (
 func NewCmdInstalls() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "installs",
-		Aliases: []string{"inst"},
+		Aliases: []string{"install", "inst"},
 		Short:   "Manage installs",
 	}
 
@@ -49,8 +49,9 @@ func newCmdList() *cobra.Command {
 	var cursor string
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List installs in the active workspace",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List installs in the active workspace",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
@@ -114,16 +115,30 @@ func newCmdList() *cobra.Command {
 
 func newCmdGet() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get <install-id>",
+		Use:   "get [install-id]",
 		Short: "Get install details",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<install-id> argument required when not running interactively")
+			}
+
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.GetV1InstallsIdWithResponse(cmd.Context(), args[0])
+			installID := ""
+			if len(args) > 0 {
+				installID = args[0]
+			} else {
+				installID, err = pickInstall(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			resp, err := client.GetV1InstallsIdWithResponse(cmd.Context(), installID)
 			if err != nil {
 				return fmt.Errorf("fetching install: %w", err)
 			}
@@ -155,16 +170,16 @@ func newCmdGet() *cobra.Command {
 }
 
 func newCmdDelete() *cobra.Command {
-	var force bool
+	var yes bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <install-id>",
+		Use:   "delete [install-id]",
 		Short: "Delete an install",
 		Long:  "Triggers an async deletion workflow that removes the ArgoCD application and install record.",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !force {
-				return fmt.Errorf("this will permanently delete the install. Use --force to confirm")
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<install-id> argument required when not running interactively")
 			}
 
 			client, _, err := cmdutil.NewClient()
@@ -172,7 +187,31 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1InstallsIdWithResponse(cmd.Context(), args[0])
+			installID := ""
+			if len(args) > 0 {
+				installID = args[0]
+			} else {
+				installID, err = pickInstall(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			if !yes {
+				if !prompt.IsInteractive() {
+					return fmt.Errorf("use --yes to confirm deletion in non-interactive mode")
+				}
+				confirmed, err := prompt.Confirm(fmt.Sprintf("Delete install %s?", installID))
+				if err != nil {
+					return err
+				}
+				if !confirmed {
+					fmt.Println("Cancelled.")
+					return nil
+				}
+			}
+
+			resp, err := client.DeleteV1InstallsIdWithResponse(cmd.Context(), installID)
 			if err != nil {
 				return fmt.Errorf("deleting install: %w", err)
 			}
@@ -180,12 +219,12 @@ func newCmdDelete() *cobra.Command {
 				return apiError(resp.Status(), resp.JSON401, resp.JSON404)
 			}
 
-			fmt.Printf("Install %s deletion started.\n", args[0])
+			fmt.Printf("Install %s deletion started.\n", installID)
 			return nil
 		},
 	}
 
-	cmd.Flags().BoolVar(&force, "force", false, "Confirm deletion")
+	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Skip confirmation prompt")
 
 	return cmd
 }
@@ -237,14 +276,28 @@ func newCmdUpdateValues() *cobra.Command {
 	var sourceID, valuesFile string
 
 	cmd := &cobra.Command{
-		Use:   "update-values <install-id>",
+		Use:   "update-values [install-id]",
 		Short: "Update install template values",
 		Long:  "Updates template helm source values and regenerates the chart.",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<install-id> argument required when not running interactively")
+			}
+
 			client, _, err := cmdutil.NewClient()
 			if err != nil {
 				return err
+			}
+
+			installID := ""
+			if len(args) > 0 {
+				installID = args[0]
+			} else {
+				installID, err = pickInstall(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
 			}
 
 			values, err := readValuesFile(valuesFile)
@@ -264,7 +317,7 @@ func newCmdUpdateValues() *cobra.Command {
 				},
 			}
 
-			resp, err := client.PatchV1InstallsIdValuesWithResponse(cmd.Context(), args[0], body)
+			resp, err := client.PatchV1InstallsIdValuesWithResponse(cmd.Context(), installID, body)
 			if err != nil {
 				return fmt.Errorf("updating install values: %w", err)
 			}
@@ -289,14 +342,28 @@ func newCmdUpdateOverrides() *cobra.Command {
 	var sourceID, valuesFile string
 
 	cmd := &cobra.Command{
-		Use:   "update-overrides <install-id>",
+		Use:   "update-overrides [install-id]",
 		Short: "Update install value overrides",
 		Long:  "Applies per-install value overrides on top of product base values.",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<install-id> argument required when not running interactively")
+			}
+
 			client, _, err := cmdutil.NewClient()
 			if err != nil {
 				return err
+			}
+
+			installID := ""
+			if len(args) > 0 {
+				installID = args[0]
+			} else {
+				installID, err = pickInstall(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
 			}
 
 			values, err := readValuesFile(valuesFile)
@@ -316,7 +383,7 @@ func newCmdUpdateOverrides() *cobra.Command {
 				},
 			}
 
-			resp, err := client.PatchV1InstallsIdOverridesWithResponse(cmd.Context(), args[0], body)
+			resp, err := client.PatchV1InstallsIdOverridesWithResponse(cmd.Context(), installID, body)
 			if err != nil {
 				return fmt.Errorf("updating install overrides: %w", err)
 			}
@@ -363,16 +430,30 @@ func readValuesFile(path string) (map[string]*interface{}, error) {
 
 func newCmdPods() *cobra.Command {
 	return &cobra.Command{
-		Use:   "pods <install-id>",
+		Use:   "pods [install-id]",
 		Short: "List pods for an install",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<install-id> argument required when not running interactively")
+			}
+
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.GetV1InstallsIdPodsWithResponse(cmd.Context(), args[0])
+			installID := ""
+			if len(args) > 0 {
+				installID = args[0]
+			} else {
+				installID, err = pickInstall(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			resp, err := client.GetV1InstallsIdPodsWithResponse(cmd.Context(), installID)
 			if err != nil {
 				return fmt.Errorf("fetching pods: %w", err)
 			}
@@ -802,6 +883,30 @@ func sendResize(ctx context.Context, conn *websocket.Conn) {
 	}
 	msg, _ := json.Marshal(wsMessage{Type: "resize", Cols: w, Rows: h})
 	_ = conn.Write(ctx, websocket.MessageText, msg)
+}
+
+// pickInstall shows an interactive install picker. Returns the selected install ID.
+func pickInstall(ctx context.Context, client *api.ClientWithResponses) (string, error) {
+	limit := 100
+	listResp, err := client.GetV1InstallsWithResponse(ctx, &api.GetV1InstallsParams{Limit: &limit})
+	if err != nil {
+		return "", fmt.Errorf("fetching installs: %w", err)
+	}
+	if listResp.JSON200 == nil {
+		return "", apiError(listResp.Status(), listResp.JSON401, listResp.JSON403)
+	}
+	if len(listResp.JSON200.Data) == 0 {
+		return "", fmt.Errorf("no installs found in this workspace")
+	}
+	options := make([]prompt.SelectOption, len(listResp.JSON200.Data))
+	for i, inst := range listResp.JSON200.Data {
+		label := inst.Id
+		if inst.Name != nil {
+			label = *inst.Name + " (" + inst.Id + ")"
+		}
+		options[i] = prompt.SelectOption{Label: label, Value: inst.Id}
+	}
+	return prompt.Select("Select an install", options)
 }
 
 func apiError(status string, errs ...*api.Error) error {

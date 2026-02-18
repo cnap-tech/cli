@@ -1,6 +1,7 @@
 package clusters
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,13 +11,14 @@ import (
 	"github.com/cnap-tech/cli/internal/api"
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/cnap-tech/cli/internal/output"
+	"github.com/cnap-tech/cli/internal/prompt"
 	"github.com/spf13/cobra"
 )
 
 func NewCmdClusters() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "clusters",
-		Aliases: []string{"cl"},
+		Aliases: []string{"cluster", "cl"},
 		Short:   "Manage clusters",
 	}
 
@@ -34,8 +36,9 @@ func newCmdList() *cobra.Command {
 	var cursor string
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List clusters in the active workspace",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List clusters in the active workspace",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
@@ -97,16 +100,30 @@ func newCmdList() *cobra.Command {
 
 func newCmdGet() *cobra.Command {
 	return &cobra.Command{
-		Use:   "get <cluster-id>",
+		Use:   "get [cluster-id]",
 		Short: "Get cluster details",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<cluster-id> argument required when not running interactively")
+			}
+
 			client, cfg, err := cmdutil.NewClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.GetV1ClustersIdWithResponse(cmd.Context(), args[0])
+			clusterID := ""
+			if len(args) > 0 {
+				clusterID = args[0]
+			} else {
+				clusterID, err = pickCluster(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			resp, err := client.GetV1ClustersIdWithResponse(cmd.Context(), clusterID)
 			if err != nil {
 				return fmt.Errorf("fetching cluster: %w", err)
 			}
@@ -150,10 +167,14 @@ func newCmdUpdate() *cobra.Command {
 	var name, regionID string
 
 	cmd := &cobra.Command{
-		Use:   "update <cluster-id>",
+		Use:   "update [cluster-id]",
 		Short: "Update cluster name or region",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<cluster-id> argument required when not running interactively")
+			}
+
 			if name == "" && regionID == "" {
 				return fmt.Errorf("at least one of --name or --region is required")
 			}
@@ -161,6 +182,16 @@ func newCmdUpdate() *cobra.Command {
 			client, _, err := cmdutil.NewClient()
 			if err != nil {
 				return err
+			}
+
+			clusterID := ""
+			if len(args) > 0 {
+				clusterID = args[0]
+			} else {
+				clusterID, err = pickCluster(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
 			}
 
 			body := api.PatchV1ClustersIdJSONRequestBody{}
@@ -171,7 +202,7 @@ func newCmdUpdate() *cobra.Command {
 				body.RegionId = &regionID
 			}
 
-			resp, err := client.PatchV1ClustersIdWithResponse(cmd.Context(), args[0], body)
+			resp, err := client.PatchV1ClustersIdWithResponse(cmd.Context(), clusterID, body)
 			if err != nil {
 				return fmt.Errorf("updating cluster: %w", err)
 			}
@@ -191,15 +222,15 @@ func newCmdUpdate() *cobra.Command {
 }
 
 func newCmdDelete() *cobra.Command {
-	var force bool
+	var yes bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <cluster-id>",
+		Use:   "delete [cluster-id]",
 		Short: "Delete a cluster",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !force {
-				return fmt.Errorf("this will permanently delete the cluster. Use --force to confirm")
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<cluster-id> argument required when not running interactively")
 			}
 
 			client, _, err := cmdutil.NewClient()
@@ -207,7 +238,31 @@ func newCmdDelete() *cobra.Command {
 				return err
 			}
 
-			resp, err := client.DeleteV1ClustersIdWithResponse(cmd.Context(), args[0])
+			clusterID := ""
+			if len(args) > 0 {
+				clusterID = args[0]
+			} else {
+				clusterID, err = pickCluster(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			if !yes {
+				if !prompt.IsInteractive() {
+					return fmt.Errorf("use --yes to confirm deletion in non-interactive mode")
+				}
+				confirmed, err := prompt.Confirm(fmt.Sprintf("Delete cluster %s?", clusterID))
+				if err != nil {
+					return err
+				}
+				if !confirmed {
+					fmt.Println("Cancelled.")
+					return nil
+				}
+			}
+
+			resp, err := client.DeleteV1ClustersIdWithResponse(cmd.Context(), clusterID)
 			if err != nil {
 				return fmt.Errorf("deleting cluster: %w", err)
 			}
@@ -215,12 +270,12 @@ func newCmdDelete() *cobra.Command {
 				return fmt.Errorf("unexpected response: %s", resp.Status())
 			}
 
-			fmt.Printf("Cluster %s deleted.\n", args[0])
+			fmt.Printf("Cluster %s deleted.\n", clusterID)
 			return nil
 		},
 	}
 
-	cmd.Flags().BoolVar(&force, "force", false, "Confirm deletion")
+	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Skip confirmation prompt")
 
 	return cmd
 }
@@ -229,17 +284,31 @@ func newCmdKubeconfig() *cobra.Command {
 	var outputFile string
 
 	cmd := &cobra.Command{
-		Use:   "kubeconfig <cluster-id>",
+		Use:   "kubeconfig [cluster-id]",
 		Short: "Get cluster admin kubeconfig",
 		Long:  "Downloads the admin kubeconfig for a KaaS-managed cluster. The cluster must be running.",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && !prompt.IsInteractive() {
+				return fmt.Errorf("<cluster-id> argument required when not running interactively")
+			}
+
 			client, _, err := cmdutil.NewClient()
 			if err != nil {
 				return err
 			}
 
-			resp, err := client.GetV1ClustersIdKubeconfig(cmd.Context(), args[0])
+			clusterID := ""
+			if len(args) > 0 {
+				clusterID = args[0]
+			} else {
+				clusterID, err = pickCluster(cmd.Context(), client)
+				if err != nil {
+					return err
+				}
+			}
+
+			resp, err := client.GetV1ClustersIdKubeconfig(cmd.Context(), clusterID)
 			if err != nil {
 				return fmt.Errorf("fetching kubeconfig: %w", err)
 			}
@@ -274,6 +343,26 @@ func newCmdKubeconfig() *cobra.Command {
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "Write kubeconfig to file (mode 0600)")
 
 	return cmd
+}
+
+// pickCluster shows an interactive cluster picker. Returns the selected cluster ID.
+func pickCluster(ctx context.Context, client *api.ClientWithResponses) (string, error) {
+	limit := 100
+	listResp, err := client.GetV1ClustersWithResponse(ctx, &api.GetV1ClustersParams{Limit: &limit})
+	if err != nil {
+		return "", fmt.Errorf("fetching clusters: %w", err)
+	}
+	if listResp.JSON200 == nil {
+		return "", apiError(listResp.Status(), listResp.JSON401, listResp.JSON403)
+	}
+	if len(listResp.JSON200.Data) == 0 {
+		return "", fmt.Errorf("no clusters found in this workspace")
+	}
+	options := make([]prompt.SelectOption, len(listResp.JSON200.Data))
+	for i, c := range listResp.JSON200.Data {
+		options[i] = prompt.SelectOption{Label: c.Name + " (" + c.Id + ")", Value: c.Id}
+	}
+	return prompt.Select("Select a cluster", options)
 }
 
 func apiError(status string, errs ...*api.Error) error {
