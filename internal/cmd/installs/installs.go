@@ -790,7 +790,7 @@ func runExec(parentCtx context.Context, cfg *config.Config, installID, podName, 
 		}
 		return fmt.Errorf("WebSocket connection failed: %w", err)
 	}
-	defer conn.CloseNow()
+	defer func() { _ = conn.CloseNow() }()
 
 	// Put terminal in raw mode
 	fd := int(os.Stdin.Fd())
@@ -858,7 +858,7 @@ func runExec(parentCtx context.Context, cfg *config.Config, installID, podName, 
 			case syscall.SIGWINCH:
 				sendResize(ctx, conn)
 			case syscall.SIGINT, syscall.SIGTERM:
-				conn.Close(websocket.StatusNormalClosure, "")
+				_ = conn.Close(websocket.StatusNormalClosure, "")
 				return
 			}
 		}
