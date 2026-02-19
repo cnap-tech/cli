@@ -1,18 +1,39 @@
 package installs
 
 import (
-	"fmt"
+	"context"
+	"os"
+	"time"
 
-	"github.com/spf13/cobra"
+	"github.com/coder/websocket"
+	"golang.org/x/term"
 )
 
-func newCmdExec() *cobra.Command {
-	return &cobra.Command{
-		Use:   "exec [install-id]",
-		Short: "Open an interactive shell in a pod container",
-		Long:  "The exec command is not supported on Windows.",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("exec is not supported on Windows")
-		},
+// monitorResize polls terminal size every 250ms and sends resize events when dimensions change.
+// Windows has no SIGWINCH equivalent, so polling is the standard approach (used by kubectl).
+func monitorResize(ctx context.Context, conn *websocket.Conn, stop <-chan struct{}) {
+	fd := int(os.Stdout.Fd())
+	w, h, err := term.GetSize(fd)
+	if err != nil {
+		return
+	}
+
+	ticker := time.NewTicker(250 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			newW, newH, err := term.GetSize(fd)
+			if err != nil {
+				continue
+			}
+			if newW != w || newH != h {
+				w, h = newW, newH
+				sendResize(ctx, conn)
+			}
+		case <-stop:
+			return
+		}
 	}
 }
