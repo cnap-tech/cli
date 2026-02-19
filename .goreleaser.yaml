@@ -1,6 +1,14 @@
 version: 2
 project_name: cnap
 
+before:
+  hooks:
+    - go mod tidy
+    - mkdir -p completions
+    - sh -c "go run ./cmd/cnap completion bash > completions/cnap.bash"
+    - sh -c "go run ./cmd/cnap completion zsh > completions/cnap.zsh"
+    - sh -c "go run ./cmd/cnap completion fish > completions/cnap.fish"
+
 builds:
   - main: ./cmd/cnap/
     binary: cnap
@@ -24,22 +32,24 @@ archives:
       - goos: windows
         formats: [zip]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - completions/*
 
-brews:
+homebrew_casks:
   - skip_upload: "{{ if .Env.HOMEBREW_TAP_TOKEN }}false{{ else }}true{{ end }}"
     repository:
       owner: cnap-tech
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Formula
-    homepage: https://cnap.tech
+    directory: Casks
+    homepage: https://docs.cnap.tech/cli
     description: CLI for managing CNAP workspaces, clusters, and deployments
-    license: Apache-2.0
-    install: |
-      bin.install "cnap"
-      generate_completions_from_executable(bin/"cnap", "completion")
-    test: |
-      assert_match version.to_s, shell_output("#{bin}/cnap --version")
+    binaries:
+      - cnap
+    completions:
+      bash: completions/cnap.bash
+      zsh: completions/cnap.zsh
+      fish: completions/cnap.fish
 
 checksum:
   name_template: checksums.txt
