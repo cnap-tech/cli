@@ -108,6 +108,12 @@ Config is stored at `~/.cnap/config.yaml`. Environment variables take priority:
 
 ## Commands
 
+All resource commands support singular and plural forms (e.g. `cnap cluster` or `cnap clusters`),
+short aliases (e.g. `cl`, `inst`, `tpl`), and `ls` as an alias for `list`.
+
+When run interactively without an ID argument, commands show a picker to select a resource.
+Delete commands prompt for confirmation unless `--yes`/`-y` is passed.
+
 | Command | Description |
 |---------|-------------|
 | **Auth** | |
@@ -117,35 +123,37 @@ Config is stored at `~/.cnap/config.yaml`. Environment variables take priority:
 | `cnap auth status` | Show auth status and token type |
 | **Workspaces** | |
 | `cnap workspaces list` | List workspaces |
-| `cnap workspaces switch <id>` | Set active workspace |
+| `cnap workspaces switch [id]` | Set active workspace |
 | **Clusters** | |
 | `cnap clusters list` | List clusters |
-| `cnap clusters get <id>` | Get cluster details |
-| `cnap clusters update <id>` | Update cluster |
-| `cnap clusters delete <id> --force` | Delete cluster |
+| `cnap clusters get [id]` | Get cluster details |
+| `cnap clusters update [id]` | Update cluster |
+| `cnap clusters delete [id]` | Delete cluster (confirms interactively) |
+| `cnap clusters kubeconfig [id]` | Download admin kubeconfig |
 | **Templates** | |
 | `cnap templates list` | List templates |
-| `cnap templates get <id>` | Get template with helm sources |
-| `cnap templates delete <id> --force` | Delete template |
+| `cnap templates get [id]` | Get template with helm sources |
+| `cnap templates delete [id]` | Delete template (confirms interactively) |
 | **Products** | |
 | `cnap products list` | List products |
-| `cnap products get <id>` | Get product details |
-| `cnap products delete <id> --force` | Delete product |
+| `cnap products get [id]` | Get product details |
+| `cnap products delete [id]` | Delete product (confirms interactively) |
 | **Installs** | |
 | `cnap installs list` | List installs |
-| `cnap installs get <id>` | Get install details |
+| `cnap installs get [id]` | Get install details |
 | `cnap installs create --product <id> --region <id>` | Create product install |
-| `cnap installs update-values <id> --source <id> -f values.yaml` | Update template values |
-| `cnap installs update-overrides <id> --source <id> -f values.yaml` | Update install overrides |
-| `cnap installs delete <id> --force` | Delete install |
-| `cnap installs pods <id>` | List pods |
-| `cnap installs logs <id> [--pod X] [--follow] [--tail N]` | Stream logs |
+| `cnap installs update-values [id] --source <id> -f values.yaml` | Update template values |
+| `cnap installs update-overrides [id] --source <id> -f values.yaml` | Update install overrides |
+| `cnap installs delete [id]` | Delete install (confirms interactively) |
+| `cnap installs pods [id]` | List pods |
+| `cnap installs logs [id] [--pod X] [--follow] [--tail N]` | Stream logs |
+| `cnap installs exec [id] [--pod X] [--container X]` | Open interactive shell in pod |
 | **Regions** | |
 | `cnap regions list` | List regions |
 | `cnap regions create --name <name>` | Create region |
 | **Registry** | |
 | `cnap registry list` | List registry credentials |
-| `cnap registry delete <id> --force` | Delete registry credential |
+| `cnap registry delete [id]` | Delete registry credential (confirms interactively) |
 | **Shell Completions** | |
 | `cnap completion bash` | Generate bash completions |
 | `cnap completion zsh` | Generate zsh completions |
