@@ -3335,6 +3335,7 @@ func (r PatchV1ClustersIdResponse) StatusCode() int {
 type GetV1ClustersIdKubeconfigResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *map[string]*interface{}
 	YAML200      *string
 	JSON400      *Error
 	JSON401      *Error
@@ -4669,6 +4670,13 @@ func ParseGetV1ClustersIdKubeconfigResponse(rsp *http.Response) (*GetV1ClustersI
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]*interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
