@@ -48,7 +48,7 @@ func Execute(ctx context.Context) error {
 	// Print update notice after command output
 	if newRelease := <-updateCh; newRelease != nil {
 		isHomebrew := update.IsUnderHomebrew()
-		if !(isHomebrew && update.IsRecentRelease(newRelease.PublishedAt)) {
+		if !isHomebrew || !update.IsRecentRelease(newRelease.PublishedAt) {
 			fmt.Fprintf(os.Stderr, "\nA new release of cnap is available: %s → %s\n",
 				strings.TrimPrefix(version, "v"),
 				strings.TrimPrefix(newRelease.Version, "v"))
