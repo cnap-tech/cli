@@ -3,6 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+	"time"
 
 	authcmd "github.com/cnap-tech/cli/internal/cmd/auth"
 	clusterscmd "github.com/cnap-tech/cli/internal/cmd/clusters"
@@ -14,6 +17,7 @@ import (
 	workspacescmd "github.com/cnap-tech/cli/internal/cmd/workspaces"
 	"github.com/cnap-tech/cli/internal/cmdutil"
 	"github.com/cnap-tech/cli/internal/debug"
+	"github.com/cnap-tech/cli/internal/update"
 	"github.com/cnap-tech/cli/internal/useragent"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +28,38 @@ var (
 )
 
 func Execute(ctx context.Context) error {
-	return rootCmd().ExecuteContext(ctx)
+	root := rootCmd()
+
+	// Background update check (gh CLI pattern)
+	updateCh := make(chan *update.ReleaseInfo)
+	go func() {
+		if version == "dev" || !update.ShouldCheckForUpdate() {
+			updateCh <- nil
+			return
+		}
+		checkCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		rel, _ := update.CheckForUpdate(checkCtx, version)
+		updateCh <- rel
+	}()
+
+	err := root.ExecuteContext(ctx)
+
+	// Print update notice after command output
+	if newRelease := <-updateCh; newRelease != nil {
+		isHomebrew := update.IsUnderHomebrew()
+		if !(isHomebrew && update.IsRecentRelease(newRelease.PublishedAt)) {
+			fmt.Fprintf(os.Stderr, "\nA new release of cnap is available: %s → %s\n",
+				strings.TrimPrefix(version, "v"),
+				strings.TrimPrefix(newRelease.Version, "v"))
+			if isHomebrew {
+				fmt.Fprintf(os.Stderr, "To upgrade, run: brew upgrade cnap\n")
+			}
+			fmt.Fprintf(os.Stderr, "%s\n", newRelease.URL)
+		}
+	}
+
+	return err
 }
 
 func rootCmd() *cobra.Command {

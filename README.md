@@ -97,6 +97,7 @@ Config is stored at `~/.cnap/config.yaml`. Environment variables take priority:
 | `CNAP_API_URL` | API base URL (overrides config) |
 | `CNAP_AUTH_URL` | Auth base URL (overrides config) |
 | `CNAP_DEBUG` | Enable debug logging (set to any value) |
+| `CNAP_NO_UPDATE_NOTIFIER` | Disable update notifications (set to any value) |
 
 ## Global Flags
 
