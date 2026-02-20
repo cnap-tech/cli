@@ -35,21 +35,22 @@ archives:
     files:
       - completions/*
 
-homebrew_casks:
+brews:
   - skip_upload: "{{ if .Env.HOMEBREW_TAP_TOKEN }}false{{ else }}true{{ end }}"
     repository:
       owner: cnap-tech
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Casks
+    directory: Formula
     homepage: https://docs.cnap.tech/cli
     description: CLI for managing CNAP workspaces, clusters, and deployments
-    binaries:
-      - cnap
-    completions:
-      bash: completions/cnap.bash
-      zsh: completions/cnap.zsh
-      fish: completions/cnap.fish
+    install: |
+      bin.install "cnap"
+      bash_completion.install "completions/cnap.bash" => "cnap"
+      zsh_completion.install "completions/cnap.zsh" => "_cnap"
+      fish_completion.install "completions/cnap.fish"
+    test: |
+      assert_match version.to_s, shell_output("#{bin}/cnap --version")
 
 checksum:
   name_template: checksums.txt
