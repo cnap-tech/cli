@@ -39,7 +39,7 @@ and stores a session token. Sessions are long-lived and auto-refresh on use.
 
 With --token, stores the given token directly (PAT or session token).
 
-Create PATs at https://dash.cnap.tech/settings/tokens`,
+Create PATs at https://cnap.tech/settings/tokens`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.Load()
 			if err != nil {
