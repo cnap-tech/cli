@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultAPIURL  = "https://api.cnap.tech"
-	DefaultAuthURL = "https://dash.cnap.tech"
+	DefaultAuthURL = "https://cnap.tech"
 	configDir      = ".cnap"
 	configFile     = "config.yaml"
 )
