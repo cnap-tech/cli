@@ -22,6 +22,15 @@ const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
+// Defines values for DashboardWidgetDisplayType.
+const (
+	DashboardWidgetDisplayTypeJson        DashboardWidgetDisplayType = "json"
+	DashboardWidgetDisplayTypeLessThannil DashboardWidgetDisplayType = "<nil>"
+	DashboardWidgetDisplayTypeLogs        DashboardWidgetDisplayType = "logs"
+	DashboardWidgetDisplayTypeStat        DashboardWidgetDisplayType = "stat"
+	DashboardWidgetDisplayTypeTable       DashboardWidgetDisplayType = "table"
+)
+
 // Defines values for KaasInfoStatus.
 const (
 	DEGRADED     KaasInfoStatus = "DEGRADED"
@@ -37,6 +46,14 @@ const (
 	RegistryCredentialTypeBasic RegistryCredentialType = "basic"
 	RegistryCredentialTypeOauth RegistryCredentialType = "oauth"
 	RegistryCredentialTypeToken RegistryCredentialType = "token"
+)
+
+// Defines values for SnippetDisplayType.
+const (
+	SnippetDisplayTypeJson  SnippetDisplayType = "json"
+	SnippetDisplayTypeLogs  SnippetDisplayType = "logs"
+	SnippetDisplayTypeStat  SnippetDisplayType = "stat"
+	SnippetDisplayTypeTable SnippetDisplayType = "table"
 )
 
 // Defines values for TemplateRegistryProxyMode.
@@ -55,11 +72,43 @@ const (
 	TemplateDetailRegistryProxyModeNever       TemplateDetailRegistryProxyMode = "never"
 )
 
+// Defines values for PostV1DashboardsJSONBodyWidgetsDisplayType.
+const (
+	PostV1DashboardsJSONBodyWidgetsDisplayTypeJson  PostV1DashboardsJSONBodyWidgetsDisplayType = "json"
+	PostV1DashboardsJSONBodyWidgetsDisplayTypeLogs  PostV1DashboardsJSONBodyWidgetsDisplayType = "logs"
+	PostV1DashboardsJSONBodyWidgetsDisplayTypeStat  PostV1DashboardsJSONBodyWidgetsDisplayType = "stat"
+	PostV1DashboardsJSONBodyWidgetsDisplayTypeTable PostV1DashboardsJSONBodyWidgetsDisplayType = "table"
+)
+
+// Defines values for PatchV1DashboardsIdJSONBodyWidgetsDisplayType.
+const (
+	PatchV1DashboardsIdJSONBodyWidgetsDisplayTypeJson  PatchV1DashboardsIdJSONBodyWidgetsDisplayType = "json"
+	PatchV1DashboardsIdJSONBodyWidgetsDisplayTypeLogs  PatchV1DashboardsIdJSONBodyWidgetsDisplayType = "logs"
+	PatchV1DashboardsIdJSONBodyWidgetsDisplayTypeStat  PatchV1DashboardsIdJSONBodyWidgetsDisplayType = "stat"
+	PatchV1DashboardsIdJSONBodyWidgetsDisplayTypeTable PatchV1DashboardsIdJSONBodyWidgetsDisplayType = "table"
+)
+
 // Defines values for PostV1RegistryCredentialsJSONBodyType.
 const (
 	PostV1RegistryCredentialsJSONBodyTypeBasic PostV1RegistryCredentialsJSONBodyType = "basic"
 	PostV1RegistryCredentialsJSONBodyTypeOauth PostV1RegistryCredentialsJSONBodyType = "oauth"
 	PostV1RegistryCredentialsJSONBodyTypeToken PostV1RegistryCredentialsJSONBodyType = "token"
+)
+
+// Defines values for PostV1SnippetsJSONBodyDisplayType.
+const (
+	PostV1SnippetsJSONBodyDisplayTypeJson  PostV1SnippetsJSONBodyDisplayType = "json"
+	PostV1SnippetsJSONBodyDisplayTypeLogs  PostV1SnippetsJSONBodyDisplayType = "logs"
+	PostV1SnippetsJSONBodyDisplayTypeStat  PostV1SnippetsJSONBodyDisplayType = "stat"
+	PostV1SnippetsJSONBodyDisplayTypeTable PostV1SnippetsJSONBodyDisplayType = "table"
+)
+
+// Defines values for PatchV1SnippetsIdJSONBodyDisplayType.
+const (
+	PatchV1SnippetsIdJSONBodyDisplayTypeJson  PatchV1SnippetsIdJSONBodyDisplayType = "json"
+	PatchV1SnippetsIdJSONBodyDisplayTypeLogs  PatchV1SnippetsIdJSONBodyDisplayType = "logs"
+	PatchV1SnippetsIdJSONBodyDisplayTypeStat  PatchV1SnippetsIdJSONBodyDisplayType = "stat"
+	PatchV1SnippetsIdJSONBodyDisplayTypeTable PatchV1SnippetsIdJSONBodyDisplayType = "table"
 )
 
 // Defines values for PostV1TemplatesJSONBodyRegistryProxyMode.
@@ -125,6 +174,45 @@ type CreatedToken struct {
 	Token string `json:"token"`
 }
 
+// Dashboard defines model for Dashboard.
+type Dashboard struct {
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
+
+	// CreatedBy User ID of the dashboard creator
+	CreatedBy string `json:"created_by"`
+
+	// Description Optional dashboard description
+	Description *string `json:"description"`
+	Id          string  `json:"id"`
+	Name        string  `json:"name"`
+
+	// Widgets Ordered list of widgets in the dashboard grid
+	Widgets     []DashboardWidget `json:"widgets"`
+	WorkspaceId string            `json:"workspace_id"`
+}
+
+// DashboardList defines model for DashboardList.
+type DashboardList struct {
+	Data       []Dashboard `json:"data"`
+	Pagination Pagination  `json:"pagination"`
+}
+
+// DashboardWidget defines model for DashboardWidget.
+type DashboardWidget struct {
+	// ColSpan Column span in the grid (1–4)
+	ColSpan int `json:"col_span"`
+
+	// DisplayType Override the snippet default display type for this widget
+	DisplayType *DashboardWidgetDisplayType `json:"display_type"`
+
+	// SnippetId ID of the snippet this widget runs
+	SnippetId string `json:"snippet_id"`
+}
+
+// DashboardWidgetDisplayType Override the snippet default display type for this widget
+type DashboardWidgetDisplayType string
+
 // Error defines model for Error.
 type Error struct {
 	Error struct {
@@ -138,20 +226,43 @@ type Error struct {
 	} `json:"error"`
 }
 
+// ExecResult defines model for ExecResult.
+type ExecResult struct {
+	// ExitCode Exit code (0 = success)
+	ExitCode int `json:"exit_code"`
+
+	// Stderr Standard error
+	Stderr string `json:"stderr"`
+
+	// Stdout Standard output
+	Stdout string `json:"stdout"`
+}
+
 // HelmSource defines model for HelmSource.
 type HelmSource struct {
-	Chart    HelmSourceChart          `json:"chart"`
-	Id       string                   `json:"id"`
+	Chart HelmSourceChart `json:"chart"`
+	Id    string          `json:"id"`
+
+	// Metadata Source metadata (ArtifactHub info, image details)
 	Metadata *map[string]*interface{} `json:"metadata,omitempty"`
-	Values   *map[string]*interface{} `json:"values,omitempty"`
+
+	// Values Helm values override
+	Values *map[string]*interface{} `json:"values,omitempty"`
 }
 
 // HelmSourceChart defines model for HelmSourceChart.
 type HelmSourceChart struct {
-	Chart          *string `json:"chart,omitempty"`
-	Path           *string `json:"path,omitempty"`
-	RepoUrl        string  `json:"repo_url"`
-	TargetRevision string  `json:"target_revision"`
+	// Chart Chart name within the repository
+	Chart *string `json:"chart,omitempty"`
+
+	// Path Path within a Git repository to the chart
+	Path *string `json:"path,omitempty"`
+
+	// RepoUrl Helm repository URL or Git repository URL
+	RepoUrl string `json:"repo_url"`
+
+	// TargetRevision Chart version or Git revision
+	TargetRevision string `json:"target_revision"`
 }
 
 // Install defines model for Install.
@@ -179,12 +290,17 @@ type InstallList struct {
 
 // KaasInfo Present if cluster is KaaS-managed
 type KaasInfo struct {
-	Status        KaasInfoStatus `json:"status"`
-	StatusMessage *string        `json:"status_message"`
-	Version       string         `json:"version"`
+	// Status Current lifecycle status of the KaaS cluster
+	Status KaasInfoStatus `json:"status"`
+
+	// StatusMessage Human-readable status details
+	StatusMessage *string `json:"status_message"`
+
+	// Version Kubernetes version
+	Version string `json:"version"`
 }
 
-// KaasInfoStatus defines model for KaasInfo.Status.
+// KaasInfoStatus Current lifecycle status of the KaaS cluster
 type KaasInfoStatus string
 
 // Pagination defines model for Pagination.
@@ -206,11 +322,20 @@ type Product struct {
 	CreatedAt float32 `json:"created_at"`
 	Id        string  `json:"id"`
 	Name      string  `json:"name"`
-	Settings  *struct {
+
+	// Settings Marketplace display settings
+	Settings *struct {
+		// CustomDescription Custom marketplace description
 		CustomDescription *string `json:"custom_description,omitempty"`
-		CustomImage       *string `json:"custom_image,omitempty"`
-		ShowSources       *bool   `json:"show_sources,omitempty"`
+
+		// CustomImage Custom marketplace image URL
+		CustomImage *string `json:"custom_image,omitempty"`
+
+		// ShowSources Show helm sources on marketplace page
+		ShowSources *bool `json:"show_sources,omitempty"`
 	} `json:"settings"`
+
+	// TemplateId Template backing this product
 	TemplateId  string `json:"template_id"`
 	WorkspaceId string `json:"workspace_id"`
 }
@@ -266,31 +391,65 @@ type RegistryCredentialList struct {
 	Pagination Pagination           `json:"pagination"`
 }
 
+// Snippet defines model for Snippet.
+type Snippet struct {
+	// Code Async JavaScript function body executed in a sandboxed V8 isolate. Has access to cnap.request() for API calls.
+	Code string `json:"code"`
+
+	// CreatedAt Unix timestamp (seconds)
+	CreatedAt float32 `json:"created_at"`
+
+	// CreatedBy User ID of the snippet creator
+	CreatedBy   string  `json:"created_by"`
+	Description *string `json:"description"`
+
+	// DisplayType Controls how the snippet result is rendered in dashboard widgets
+	DisplayType SnippetDisplayType `json:"display_type"`
+	Id          string             `json:"id"`
+	Name        string             `json:"name"`
+	WorkspaceId string             `json:"workspace_id"`
+}
+
+// SnippetDisplayType Controls how the snippet result is rendered in dashboard widgets
+type SnippetDisplayType string
+
+// SnippetList defines model for SnippetList.
+type SnippetList struct {
+	Data       []Snippet  `json:"data"`
+	Pagination Pagination `json:"pagination"`
+}
+
 // Template defines model for Template.
 type Template struct {
 	// CreatedAt Unix timestamp (seconds)
-	CreatedAt         float32                    `json:"created_at"`
-	Id                string                     `json:"id"`
-	Name              string                     `json:"name"`
+	CreatedAt float32 `json:"created_at"`
+	Id        string  `json:"id"`
+	Name      string  `json:"name"`
+
+	// RegistryProxyMode OCI registry proxy mode for image pulls
 	RegistryProxyMode *TemplateRegistryProxyMode `json:"registry_proxy_mode"`
 	WorkspaceId       string                     `json:"workspace_id"`
 }
 
-// TemplateRegistryProxyMode defines model for Template.RegistryProxyMode.
+// TemplateRegistryProxyMode OCI registry proxy mode for image pulls
 type TemplateRegistryProxyMode string
 
 // TemplateDetail defines model for TemplateDetail.
 type TemplateDetail struct {
 	// CreatedAt Unix timestamp (seconds)
-	CreatedAt         float32                          `json:"created_at"`
-	HelmSources       []HelmSource                     `json:"helm_sources"`
-	Id                string                           `json:"id"`
-	Name              string                           `json:"name"`
+	CreatedAt float32 `json:"created_at"`
+
+	// HelmSources Helm chart sources for this template
+	HelmSources []HelmSource `json:"helm_sources"`
+	Id          string       `json:"id"`
+	Name        string       `json:"name"`
+
+	// RegistryProxyMode OCI registry proxy mode for image pulls
 	RegistryProxyMode *TemplateDetailRegistryProxyMode `json:"registry_proxy_mode"`
 	WorkspaceId       string                           `json:"workspace_id"`
 }
 
-// TemplateDetailRegistryProxyMode defines model for TemplateDetail.RegistryProxyMode.
+// TemplateDetailRegistryProxyMode OCI registry proxy mode for image pulls
 type TemplateDetailRegistryProxyMode string
 
 // TemplateList defines model for TemplateList.
@@ -330,6 +489,62 @@ type PatchV1ClustersIdJSONBody struct {
 	// RegionId Region ID
 	RegionId *string `json:"region_id,omitempty"`
 }
+
+// PostV1ClustersIdExecJSONBody defines parameters for PostV1ClustersIdExec.
+type PostV1ClustersIdExecJSONBody struct {
+	// Command Command and arguments
+	Command []string `json:"command"`
+
+	// Container Container name within the pod
+	Container string `json:"container"`
+
+	// Namespace Kubernetes namespace
+	Namespace string `json:"namespace"`
+
+	// Pod Pod name
+	Pod string `json:"pod"`
+}
+
+// GetV1DashboardsParams defines parameters for GetV1Dashboards.
+type GetV1DashboardsParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// PostV1DashboardsJSONBody defines parameters for PostV1Dashboards.
+type PostV1DashboardsJSONBody struct {
+	Description *string `json:"description,omitempty"`
+	Name        string  `json:"name"`
+	Widgets     *[]struct {
+		ColSpan *int `json:"col_span,omitempty"`
+
+		// DisplayType Controls how the snippet result is rendered in dashboard widgets
+		DisplayType *PostV1DashboardsJSONBodyWidgetsDisplayType `json:"display_type,omitempty"`
+		SnippetId   string                                      `json:"snippet_id"`
+	} `json:"widgets,omitempty"`
+}
+
+// PostV1DashboardsJSONBodyWidgetsDisplayType defines parameters for PostV1Dashboards.
+type PostV1DashboardsJSONBodyWidgetsDisplayType string
+
+// PatchV1DashboardsIdJSONBody defines parameters for PatchV1DashboardsId.
+type PatchV1DashboardsIdJSONBody struct {
+	Description *string `json:"description,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Widgets     *[]struct {
+		ColSpan *int `json:"col_span,omitempty"`
+
+		// DisplayType Controls how the snippet result is rendered in dashboard widgets
+		DisplayType *PatchV1DashboardsIdJSONBodyWidgetsDisplayType `json:"display_type,omitempty"`
+		SnippetId   string                                         `json:"snippet_id"`
+	} `json:"widgets,omitempty"`
+}
+
+// PatchV1DashboardsIdJSONBodyWidgetsDisplayType defines parameters for PatchV1DashboardsId.
+type PatchV1DashboardsIdJSONBodyWidgetsDisplayType string
 
 // GetV1InstallsParams defines parameters for GetV1Installs.
 type GetV1InstallsParams struct {
@@ -510,12 +725,23 @@ type GetV1RegistryCredentialsParams struct {
 type PostV1RegistryCredentialsJSONBody struct {
 	// Credentials Auth credentials (type-dependent)
 	Credentials struct {
-		ClientId     *string `json:"client_id,omitempty"`
+		// ClientId Client ID for OAuth
+		ClientId *string `json:"client_id,omitempty"`
+
+		// ClientSecret Client secret for OAuth
 		ClientSecret *string `json:"client_secret,omitempty"`
-		Password     *string `json:"password,omitempty"`
-		Token        *string `json:"token,omitempty"`
-		TokenUrl     *string `json:"token_url,omitempty"`
-		Username     *string `json:"username,omitempty"`
+
+		// Password Password for basic auth
+		Password *string `json:"password,omitempty"`
+
+		// Token Bearer token for token auth
+		Token *string `json:"token,omitempty"`
+
+		// TokenUrl Token endpoint URL for OAuth
+		TokenUrl *string `json:"token_url,omitempty"`
+
+		// Username Username for basic auth
+		Username *string `json:"username,omitempty"`
 	} `json:"credentials"`
 	Name        string `json:"name"`
 	RegistryUrl string `json:"registry_url"`
@@ -526,6 +752,44 @@ type PostV1RegistryCredentialsJSONBody struct {
 
 // PostV1RegistryCredentialsJSONBodyType defines parameters for PostV1RegistryCredentials.
 type PostV1RegistryCredentialsJSONBodyType string
+
+// GetV1SnippetsParams defines parameters for GetV1Snippets.
+type GetV1SnippetsParams struct {
+	// Cursor Pagination cursor from previous response
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+
+	// Limit Items per page (1-100)
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// PostV1SnippetsJSONBody defines parameters for PostV1Snippets.
+type PostV1SnippetsJSONBody struct {
+	// Code Async JavaScript function body. Executed in a sandboxed V8 isolate with access to cnap.request().
+	Code string `json:"code"`
+
+	// Description Optional human-readable description
+	Description *string `json:"description,omitempty"`
+
+	// DisplayType Controls how the snippet result is rendered in dashboard widgets
+	DisplayType PostV1SnippetsJSONBodyDisplayType `json:"display_type"`
+	Name        string                            `json:"name"`
+}
+
+// PostV1SnippetsJSONBodyDisplayType defines parameters for PostV1Snippets.
+type PostV1SnippetsJSONBodyDisplayType string
+
+// PatchV1SnippetsIdJSONBody defines parameters for PatchV1SnippetsId.
+type PatchV1SnippetsIdJSONBody struct {
+	Code        *string `json:"code,omitempty"`
+	Description *string `json:"description,omitempty"`
+
+	// DisplayType Controls how the snippet result is rendered in dashboard widgets
+	DisplayType *PatchV1SnippetsIdJSONBodyDisplayType `json:"display_type,omitempty"`
+	Name        *string                               `json:"name,omitempty"`
+}
+
+// PatchV1SnippetsIdJSONBodyDisplayType defines parameters for PatchV1SnippetsId.
+type PatchV1SnippetsIdJSONBodyDisplayType string
 
 // GetV1TemplatesParams defines parameters for GetV1Templates.
 type GetV1TemplatesParams struct {
@@ -650,6 +914,15 @@ type GetV1WorkspacesParams struct {
 // PatchV1ClustersIdJSONRequestBody defines body for PatchV1ClustersId for application/json ContentType.
 type PatchV1ClustersIdJSONRequestBody PatchV1ClustersIdJSONBody
 
+// PostV1ClustersIdExecJSONRequestBody defines body for PostV1ClustersIdExec for application/json ContentType.
+type PostV1ClustersIdExecJSONRequestBody PostV1ClustersIdExecJSONBody
+
+// PostV1DashboardsJSONRequestBody defines body for PostV1Dashboards for application/json ContentType.
+type PostV1DashboardsJSONRequestBody PostV1DashboardsJSONBody
+
+// PatchV1DashboardsIdJSONRequestBody defines body for PatchV1DashboardsId for application/json ContentType.
+type PatchV1DashboardsIdJSONRequestBody PatchV1DashboardsIdJSONBody
+
 // PostV1InstallsJSONRequestBody defines body for PostV1Installs for application/json ContentType.
 type PostV1InstallsJSONRequestBody PostV1InstallsJSONBody
 
@@ -673,6 +946,12 @@ type PostV1RegionsJSONRequestBody PostV1RegionsJSONBody
 
 // PostV1RegistryCredentialsJSONRequestBody defines body for PostV1RegistryCredentials for application/json ContentType.
 type PostV1RegistryCredentialsJSONRequestBody PostV1RegistryCredentialsJSONBody
+
+// PostV1SnippetsJSONRequestBody defines body for PostV1Snippets for application/json ContentType.
+type PostV1SnippetsJSONRequestBody PostV1SnippetsJSONBody
+
+// PatchV1SnippetsIdJSONRequestBody defines body for PatchV1SnippetsId for application/json ContentType.
+type PatchV1SnippetsIdJSONRequestBody PatchV1SnippetsIdJSONBody
 
 // PostV1TemplatesJSONRequestBody defines body for PostV1Templates for application/json ContentType.
 type PostV1TemplatesJSONRequestBody PostV1TemplatesJSONBody
@@ -770,8 +1049,35 @@ type ClientInterface interface {
 
 	PatchV1ClustersId(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PostV1ClustersIdExecWithBody request with any body
+	PostV1ClustersIdExecWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1ClustersIdExec(ctx context.Context, id string, body PostV1ClustersIdExecJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1ClustersIdKubePath request
+	GetV1ClustersIdKubePath(ctx context.Context, id string, path string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV1ClustersIdKubeconfig request
 	GetV1ClustersIdKubeconfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Dashboards request
+	GetV1Dashboards(ctx context.Context, params *GetV1DashboardsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostV1DashboardsWithBody request with any body
+	PostV1DashboardsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1Dashboards(ctx context.Context, body PostV1DashboardsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteV1DashboardsId request
+	DeleteV1DashboardsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1DashboardsId request
+	GetV1DashboardsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchV1DashboardsIdWithBody request with any body
+	PatchV1DashboardsIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchV1DashboardsId(ctx context.Context, id string, body PatchV1DashboardsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Installs request
 	GetV1Installs(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -845,6 +1151,25 @@ type ClientInterface interface {
 
 	// DeleteV1RegistryCredentialsId request
 	DeleteV1RegistryCredentialsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Snippets request
+	GetV1Snippets(ctx context.Context, params *GetV1SnippetsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostV1SnippetsWithBody request with any body
+	PostV1SnippetsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostV1Snippets(ctx context.Context, body PostV1SnippetsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteV1SnippetsId request
+	DeleteV1SnippetsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1SnippetsId request
+	GetV1SnippetsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchV1SnippetsIdWithBody request with any body
+	PatchV1SnippetsIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchV1SnippetsId(ctx context.Context, id string, body PatchV1SnippetsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Templates request
 	GetV1Templates(ctx context.Context, params *GetV1TemplatesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -943,8 +1268,128 @@ func (c *Client) PatchV1ClustersId(ctx context.Context, id string, body PatchV1C
 	return c.Client.Do(req)
 }
 
+func (c *Client) PostV1ClustersIdExecWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1ClustersIdExecRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1ClustersIdExec(ctx context.Context, id string, body PostV1ClustersIdExecJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1ClustersIdExecRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1ClustersIdKubePath(ctx context.Context, id string, path string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1ClustersIdKubePathRequest(c.Server, id, path)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetV1ClustersIdKubeconfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1ClustersIdKubeconfigRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Dashboards(ctx context.Context, params *GetV1DashboardsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1DashboardsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1DashboardsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1DashboardsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1Dashboards(ctx context.Context, body PostV1DashboardsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1DashboardsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteV1DashboardsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteV1DashboardsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1DashboardsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1DashboardsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1DashboardsIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1DashboardsIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1DashboardsId(ctx context.Context, id string, body PatchV1DashboardsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1DashboardsIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1269,6 +1714,90 @@ func (c *Client) PostV1RegistryCredentials(ctx context.Context, body PostV1Regis
 
 func (c *Client) DeleteV1RegistryCredentialsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteV1RegistryCredentialsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Snippets(ctx context.Context, params *GetV1SnippetsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1SnippetsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1SnippetsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1SnippetsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostV1Snippets(ctx context.Context, body PostV1SnippetsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostV1SnippetsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteV1SnippetsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteV1SnippetsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1SnippetsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1SnippetsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1SnippetsIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1SnippetsIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchV1SnippetsId(ctx context.Context, id string, body PatchV1SnippetsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchV1SnippetsIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1615,6 +2144,94 @@ func NewPatchV1ClustersIdRequestWithBody(server string, id string, contentType s
 	return req, nil
 }
 
+// NewPostV1ClustersIdExecRequest calls the generic PostV1ClustersIdExec builder with application/json body
+func NewPostV1ClustersIdExecRequest(server string, id string, body PostV1ClustersIdExecJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1ClustersIdExecRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPostV1ClustersIdExecRequestWithBody generates requests for PostV1ClustersIdExec with any type of body
+func NewPostV1ClustersIdExecRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/clusters/%s/exec", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetV1ClustersIdKubePathRequest generates requests for GetV1ClustersIdKubePath
+func NewGetV1ClustersIdKubePathRequest(server string, id string, path string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "path", runtime.ParamLocationPath, path)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/clusters/%s/kube/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetV1ClustersIdKubeconfigRequest generates requests for GetV1ClustersIdKubeconfig
 func NewGetV1ClustersIdKubeconfigRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -1645,6 +2262,226 @@ func NewGetV1ClustersIdKubeconfigRequest(server string, id string) (*http.Reques
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewGetV1DashboardsRequest generates requests for GetV1Dashboards
+func NewGetV1DashboardsRequest(server string, params *GetV1DashboardsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dashboards")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostV1DashboardsRequest calls the generic PostV1Dashboards builder with application/json body
+func NewPostV1DashboardsRequest(server string, body PostV1DashboardsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1DashboardsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1DashboardsRequestWithBody generates requests for PostV1Dashboards with any type of body
+func NewPostV1DashboardsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dashboards")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteV1DashboardsIdRequest generates requests for DeleteV1DashboardsId
+func NewDeleteV1DashboardsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dashboards/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1DashboardsIdRequest generates requests for GetV1DashboardsId
+func NewGetV1DashboardsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dashboards/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchV1DashboardsIdRequest calls the generic PatchV1DashboardsId builder with application/json body
+func NewPatchV1DashboardsIdRequest(server string, id string, body PatchV1DashboardsIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchV1DashboardsIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchV1DashboardsIdRequestWithBody generates requests for PatchV1DashboardsId with any type of body
+func NewPatchV1DashboardsIdRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/dashboards/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2604,6 +3441,226 @@ func NewDeleteV1RegistryCredentialsIdRequest(server string, id string) (*http.Re
 	return req, nil
 }
 
+// NewGetV1SnippetsRequest generates requests for GetV1Snippets
+func NewGetV1SnippetsRequest(server string, params *GetV1SnippetsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/snippets")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostV1SnippetsRequest calls the generic PostV1Snippets builder with application/json body
+func NewPostV1SnippetsRequest(server string, body PostV1SnippetsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostV1SnippetsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostV1SnippetsRequestWithBody generates requests for PostV1Snippets with any type of body
+func NewPostV1SnippetsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/snippets")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteV1SnippetsIdRequest generates requests for DeleteV1SnippetsId
+func NewDeleteV1SnippetsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/snippets/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1SnippetsIdRequest generates requests for GetV1SnippetsId
+func NewGetV1SnippetsIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/snippets/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchV1SnippetsIdRequest calls the generic PatchV1SnippetsId builder with application/json body
+func NewPatchV1SnippetsIdRequest(server string, id string, body PatchV1SnippetsIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchV1SnippetsIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchV1SnippetsIdRequestWithBody generates requests for PatchV1SnippetsId with any type of body
+func NewPatchV1SnippetsIdRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/snippets/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetV1TemplatesRequest generates requests for GetV1Templates
 func NewGetV1TemplatesRequest(server string, params *GetV1TemplatesParams) (*http.Request, error) {
 	var err error
@@ -3119,8 +4176,35 @@ type ClientWithResponsesInterface interface {
 
 	PatchV1ClustersIdWithResponse(ctx context.Context, id string, body PatchV1ClustersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1ClustersIdResponse, error)
 
+	// PostV1ClustersIdExecWithBodyWithResponse request with any body
+	PostV1ClustersIdExecWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1ClustersIdExecResponse, error)
+
+	PostV1ClustersIdExecWithResponse(ctx context.Context, id string, body PostV1ClustersIdExecJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1ClustersIdExecResponse, error)
+
+	// GetV1ClustersIdKubePathWithResponse request
+	GetV1ClustersIdKubePathWithResponse(ctx context.Context, id string, path string, reqEditors ...RequestEditorFn) (*GetV1ClustersIdKubePathResponse, error)
+
 	// GetV1ClustersIdKubeconfigWithResponse request
 	GetV1ClustersIdKubeconfigWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1ClustersIdKubeconfigResponse, error)
+
+	// GetV1DashboardsWithResponse request
+	GetV1DashboardsWithResponse(ctx context.Context, params *GetV1DashboardsParams, reqEditors ...RequestEditorFn) (*GetV1DashboardsResponse, error)
+
+	// PostV1DashboardsWithBodyWithResponse request with any body
+	PostV1DashboardsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1DashboardsResponse, error)
+
+	PostV1DashboardsWithResponse(ctx context.Context, body PostV1DashboardsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1DashboardsResponse, error)
+
+	// DeleteV1DashboardsIdWithResponse request
+	DeleteV1DashboardsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1DashboardsIdResponse, error)
+
+	// GetV1DashboardsIdWithResponse request
+	GetV1DashboardsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1DashboardsIdResponse, error)
+
+	// PatchV1DashboardsIdWithBodyWithResponse request with any body
+	PatchV1DashboardsIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1DashboardsIdResponse, error)
+
+	PatchV1DashboardsIdWithResponse(ctx context.Context, id string, body PatchV1DashboardsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1DashboardsIdResponse, error)
 
 	// GetV1InstallsWithResponse request
 	GetV1InstallsWithResponse(ctx context.Context, params *GetV1InstallsParams, reqEditors ...RequestEditorFn) (*GetV1InstallsResponse, error)
@@ -3194,6 +4278,25 @@ type ClientWithResponsesInterface interface {
 
 	// DeleteV1RegistryCredentialsIdWithResponse request
 	DeleteV1RegistryCredentialsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1RegistryCredentialsIdResponse, error)
+
+	// GetV1SnippetsWithResponse request
+	GetV1SnippetsWithResponse(ctx context.Context, params *GetV1SnippetsParams, reqEditors ...RequestEditorFn) (*GetV1SnippetsResponse, error)
+
+	// PostV1SnippetsWithBodyWithResponse request with any body
+	PostV1SnippetsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1SnippetsResponse, error)
+
+	PostV1SnippetsWithResponse(ctx context.Context, body PostV1SnippetsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1SnippetsResponse, error)
+
+	// DeleteV1SnippetsIdWithResponse request
+	DeleteV1SnippetsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1SnippetsIdResponse, error)
+
+	// GetV1SnippetsIdWithResponse request
+	GetV1SnippetsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1SnippetsIdResponse, error)
+
+	// PatchV1SnippetsIdWithBodyWithResponse request with any body
+	PatchV1SnippetsIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1SnippetsIdResponse, error)
+
+	PatchV1SnippetsIdWithResponse(ctx context.Context, id string, body PatchV1SnippetsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1SnippetsIdResponse, error)
 
 	// GetV1TemplatesWithResponse request
 	GetV1TemplatesWithResponse(ctx context.Context, params *GetV1TemplatesParams, reqEditors ...RequestEditorFn) (*GetV1TemplatesResponse, error)
@@ -3332,6 +4435,59 @@ func (r PatchV1ClustersIdResponse) StatusCode() int {
 	return 0
 }
 
+type PostV1ClustersIdExecResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExecResult
+	JSON400      *Error
+	JSON401      *Error
+	JSON404      *Error
+	JSON408      *Error
+	JSON500      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1ClustersIdExecResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1ClustersIdExecResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1ClustersIdKubePathResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *Error
+	JSON401      *Error
+	JSON404      *Error
+	JSON502      *Error
+	JSON504      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1ClustersIdKubePathResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1ClustersIdKubePathResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1ClustersIdKubeconfigResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3353,6 +4509,129 @@ func (r GetV1ClustersIdKubeconfigResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetV1ClustersIdKubeconfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1DashboardsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DashboardList
+	JSON401      *Error
+	JSON403      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1DashboardsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1DashboardsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostV1DashboardsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		DashboardId string `json:"dashboard_id"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1DashboardsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1DashboardsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteV1DashboardsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteV1DashboardsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteV1DashboardsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1DashboardsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Dashboard
+	JSON401      *Error
+	JSON404      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1DashboardsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1DashboardsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchV1DashboardsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		DashboardId string `json:"dashboard_id"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchV1DashboardsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchV1DashboardsIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3823,6 +5102,131 @@ func (r DeleteV1RegistryCredentialsIdResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1SnippetsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *SnippetList
+	JSON401      *Error
+	JSON403      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1SnippetsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1SnippetsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostV1SnippetsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		SnippetId string `json:"snippet_id"`
+	}
+	JSON401 *Error
+	JSON403 *Error
+	JSON422 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostV1SnippetsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostV1SnippetsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteV1SnippetsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Error
+	JSON404      *Error
+	JSON409      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteV1SnippetsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteV1SnippetsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1SnippetsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Snippet
+	JSON401      *Error
+	JSON404      *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1SnippetsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1SnippetsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchV1SnippetsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		SnippetId string `json:"snippet_id"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchV1SnippetsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchV1SnippetsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1TemplatesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -4110,6 +5514,32 @@ func (c *ClientWithResponses) PatchV1ClustersIdWithResponse(ctx context.Context,
 	return ParsePatchV1ClustersIdResponse(rsp)
 }
 
+// PostV1ClustersIdExecWithBodyWithResponse request with arbitrary body returning *PostV1ClustersIdExecResponse
+func (c *ClientWithResponses) PostV1ClustersIdExecWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1ClustersIdExecResponse, error) {
+	rsp, err := c.PostV1ClustersIdExecWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1ClustersIdExecResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1ClustersIdExecWithResponse(ctx context.Context, id string, body PostV1ClustersIdExecJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1ClustersIdExecResponse, error) {
+	rsp, err := c.PostV1ClustersIdExec(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1ClustersIdExecResponse(rsp)
+}
+
+// GetV1ClustersIdKubePathWithResponse request returning *GetV1ClustersIdKubePathResponse
+func (c *ClientWithResponses) GetV1ClustersIdKubePathWithResponse(ctx context.Context, id string, path string, reqEditors ...RequestEditorFn) (*GetV1ClustersIdKubePathResponse, error) {
+	rsp, err := c.GetV1ClustersIdKubePath(ctx, id, path, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1ClustersIdKubePathResponse(rsp)
+}
+
 // GetV1ClustersIdKubeconfigWithResponse request returning *GetV1ClustersIdKubeconfigResponse
 func (c *ClientWithResponses) GetV1ClustersIdKubeconfigWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1ClustersIdKubeconfigResponse, error) {
 	rsp, err := c.GetV1ClustersIdKubeconfig(ctx, id, reqEditors...)
@@ -4117,6 +5547,67 @@ func (c *ClientWithResponses) GetV1ClustersIdKubeconfigWithResponse(ctx context.
 		return nil, err
 	}
 	return ParseGetV1ClustersIdKubeconfigResponse(rsp)
+}
+
+// GetV1DashboardsWithResponse request returning *GetV1DashboardsResponse
+func (c *ClientWithResponses) GetV1DashboardsWithResponse(ctx context.Context, params *GetV1DashboardsParams, reqEditors ...RequestEditorFn) (*GetV1DashboardsResponse, error) {
+	rsp, err := c.GetV1Dashboards(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1DashboardsResponse(rsp)
+}
+
+// PostV1DashboardsWithBodyWithResponse request with arbitrary body returning *PostV1DashboardsResponse
+func (c *ClientWithResponses) PostV1DashboardsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1DashboardsResponse, error) {
+	rsp, err := c.PostV1DashboardsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1DashboardsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1DashboardsWithResponse(ctx context.Context, body PostV1DashboardsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1DashboardsResponse, error) {
+	rsp, err := c.PostV1Dashboards(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1DashboardsResponse(rsp)
+}
+
+// DeleteV1DashboardsIdWithResponse request returning *DeleteV1DashboardsIdResponse
+func (c *ClientWithResponses) DeleteV1DashboardsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1DashboardsIdResponse, error) {
+	rsp, err := c.DeleteV1DashboardsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteV1DashboardsIdResponse(rsp)
+}
+
+// GetV1DashboardsIdWithResponse request returning *GetV1DashboardsIdResponse
+func (c *ClientWithResponses) GetV1DashboardsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1DashboardsIdResponse, error) {
+	rsp, err := c.GetV1DashboardsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1DashboardsIdResponse(rsp)
+}
+
+// PatchV1DashboardsIdWithBodyWithResponse request with arbitrary body returning *PatchV1DashboardsIdResponse
+func (c *ClientWithResponses) PatchV1DashboardsIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1DashboardsIdResponse, error) {
+	rsp, err := c.PatchV1DashboardsIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1DashboardsIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchV1DashboardsIdWithResponse(ctx context.Context, id string, body PatchV1DashboardsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1DashboardsIdResponse, error) {
+	rsp, err := c.PatchV1DashboardsId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1DashboardsIdResponse(rsp)
 }
 
 // GetV1InstallsWithResponse request returning *GetV1InstallsResponse
@@ -4352,6 +5843,67 @@ func (c *ClientWithResponses) DeleteV1RegistryCredentialsIdWithResponse(ctx cont
 		return nil, err
 	}
 	return ParseDeleteV1RegistryCredentialsIdResponse(rsp)
+}
+
+// GetV1SnippetsWithResponse request returning *GetV1SnippetsResponse
+func (c *ClientWithResponses) GetV1SnippetsWithResponse(ctx context.Context, params *GetV1SnippetsParams, reqEditors ...RequestEditorFn) (*GetV1SnippetsResponse, error) {
+	rsp, err := c.GetV1Snippets(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1SnippetsResponse(rsp)
+}
+
+// PostV1SnippetsWithBodyWithResponse request with arbitrary body returning *PostV1SnippetsResponse
+func (c *ClientWithResponses) PostV1SnippetsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostV1SnippetsResponse, error) {
+	rsp, err := c.PostV1SnippetsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1SnippetsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostV1SnippetsWithResponse(ctx context.Context, body PostV1SnippetsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostV1SnippetsResponse, error) {
+	rsp, err := c.PostV1Snippets(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostV1SnippetsResponse(rsp)
+}
+
+// DeleteV1SnippetsIdWithResponse request returning *DeleteV1SnippetsIdResponse
+func (c *ClientWithResponses) DeleteV1SnippetsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteV1SnippetsIdResponse, error) {
+	rsp, err := c.DeleteV1SnippetsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteV1SnippetsIdResponse(rsp)
+}
+
+// GetV1SnippetsIdWithResponse request returning *GetV1SnippetsIdResponse
+func (c *ClientWithResponses) GetV1SnippetsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetV1SnippetsIdResponse, error) {
+	rsp, err := c.GetV1SnippetsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1SnippetsIdResponse(rsp)
+}
+
+// PatchV1SnippetsIdWithBodyWithResponse request with arbitrary body returning *PatchV1SnippetsIdResponse
+func (c *ClientWithResponses) PatchV1SnippetsIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchV1SnippetsIdResponse, error) {
+	rsp, err := c.PatchV1SnippetsIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1SnippetsIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchV1SnippetsIdWithResponse(ctx context.Context, id string, body PatchV1SnippetsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchV1SnippetsIdResponse, error) {
+	rsp, err := c.PatchV1SnippetsId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchV1SnippetsIdResponse(rsp)
 }
 
 // GetV1TemplatesWithResponse request returning *GetV1TemplatesResponse
@@ -4656,6 +6208,121 @@ func ParsePatchV1ClustersIdResponse(rsp *http.Response) (*PatchV1ClustersIdRespo
 	return response, nil
 }
 
+// ParsePostV1ClustersIdExecResponse parses an HTTP response from a PostV1ClustersIdExecWithResponse call
+func ParsePostV1ClustersIdExecResponse(rsp *http.Response) (*PostV1ClustersIdExecResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1ClustersIdExecResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExecResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 408:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON408 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1ClustersIdKubePathResponse parses an HTTP response from a GetV1ClustersIdKubePathWithResponse call
+func ParseGetV1ClustersIdKubePathResponse(rsp *http.Response) (*GetV1ClustersIdKubePathResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1ClustersIdKubePathResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 502:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON502 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 504:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON504 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetV1ClustersIdKubeconfigResponse parses an HTTP response from a GetV1ClustersIdKubeconfigWithResponse call
 func ParseGetV1ClustersIdKubeconfigResponse(rsp *http.Response) (*GetV1ClustersIdKubeconfigResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -4711,6 +6378,203 @@ func ParseGetV1ClustersIdKubeconfigResponse(rsp *http.Response) (*GetV1ClustersI
 			return nil, err
 		}
 		response.YAML200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1DashboardsResponse parses an HTTP response from a GetV1DashboardsWithResponse call
+func ParseGetV1DashboardsResponse(rsp *http.Response) (*GetV1DashboardsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1DashboardsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DashboardList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostV1DashboardsResponse parses an HTTP response from a PostV1DashboardsWithResponse call
+func ParsePostV1DashboardsResponse(rsp *http.Response) (*PostV1DashboardsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1DashboardsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			DashboardId string `json:"dashboard_id"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteV1DashboardsIdResponse parses an HTTP response from a DeleteV1DashboardsIdWithResponse call
+func ParseDeleteV1DashboardsIdResponse(rsp *http.Response) (*DeleteV1DashboardsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteV1DashboardsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1DashboardsIdResponse parses an HTTP response from a GetV1DashboardsIdWithResponse call
+func ParseGetV1DashboardsIdResponse(rsp *http.Response) (*GetV1DashboardsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1DashboardsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Dashboard
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchV1DashboardsIdResponse parses an HTTP response from a PatchV1DashboardsIdWithResponse call
+func ParsePatchV1DashboardsIdResponse(rsp *http.Response) (*PatchV1DashboardsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchV1DashboardsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			DashboardId string `json:"dashboard_id"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -5466,6 +7330,217 @@ func ParseDeleteV1RegistryCredentialsIdResponse(rsp *http.Response) (*DeleteV1Re
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1SnippetsResponse parses an HTTP response from a GetV1SnippetsWithResponse call
+func ParseGetV1SnippetsResponse(rsp *http.Response) (*GetV1SnippetsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1SnippetsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SnippetList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostV1SnippetsResponse parses an HTTP response from a PostV1SnippetsWithResponse call
+func ParsePostV1SnippetsResponse(rsp *http.Response) (*PostV1SnippetsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostV1SnippetsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			SnippetId string `json:"snippet_id"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteV1SnippetsIdResponse parses an HTTP response from a DeleteV1SnippetsIdWithResponse call
+func ParseDeleteV1SnippetsIdResponse(rsp *http.Response) (*DeleteV1SnippetsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteV1SnippetsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1SnippetsIdResponse parses an HTTP response from a GetV1SnippetsIdWithResponse call
+func ParseGetV1SnippetsIdResponse(rsp *http.Response) (*GetV1SnippetsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1SnippetsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Snippet
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchV1SnippetsIdResponse parses an HTTP response from a PatchV1SnippetsIdWithResponse call
+func ParsePatchV1SnippetsIdResponse(rsp *http.Response) (*PatchV1SnippetsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchV1SnippetsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			SnippetId string `json:"snippet_id"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
